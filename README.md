@@ -19,8 +19,8 @@ tpi-blockchain\
 |   |-- src\
 |   |   |- index.ts
 |   |   |-- medicamento.ts
-|- REAdme.md
-|- modelado.md
+|-- REAdme.md
+|__ modelado.md
 ```
 ## Requisitos previos
 ### Clonar repositorio fabric-samples
