@@ -1,0 +1,10 @@
+main { max-width: 800px; margin: 20px auto; font-family: sans-serif; }
+section { background: #f4f4f4; border: 1px solid #ccc; padding: 20px; margin-top: 20px; }
+div { margin-bottom: 10px; }
+label { display: inline-block; width: 150px; }
+input { width: 300px; padding: 5px; }
+button { padding: 10px 15px; background: #007bff; color: white; border: none; cursor: pointer; }
+button:disabled { background: #ccc; }
+pre { background: #333; color: #eee; padding: 15px; overflow-x: auto; }
+.error { color: red; }
+.success { color: green; }

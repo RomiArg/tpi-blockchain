@@ -1,0 +1,69 @@
+<main>
+  <h1>PharmaLedger UI</h1>
+
+  <section>
+    <h2>OrgLaboratorio: Crear Medicamento</h2>
+    <form [formGroup]="crearForm" (ngSubmit)="onCrearMedicamento()">
+      <div>
+        <label>Asset ID:</label>
+        <input formControlName="assetID" />
+      </div>
+      <div>
+        <label>Nombre:</label>
+        <input formControlName="nombreComercial" />
+      </div>
+      <div>
+        <label>Lote:</label>
+        <input formControlName="lote" />
+      </div>
+      <div>
+        <label>F. Fabricación (ISO):</label>
+        <input formControlName="fechaFabricacion" />
+      </div>
+      <div>
+        <label>F. Vencimiento (ISO):</label>
+        <input formControlName="fechaVencimiento" />
+      </div>
+      <button type="submit" [disabled]="loadingCreacion">
+        {{ loadingCreacion ? 'Creando...' : 'Crear Activo' }}
+      </button>
+    </form>
+
+    <div *ngIf="resultadoCreacion" class="success">
+      <p>Activo creado con éxito. ID: {{ resultadoCreacion.assetID }}</p>
+    </div>
+    <div *ngIf="errorCreacion" class="error">
+      <p>Error: {{ errorCreacion }}</p>
+    </div>
+  </section>
+
+  <hr />
+
+  <section>
+    <h2>Consultar Trazabilidad (Todos)</h2>
+    <form [formGroup]="consultarForm" (ngSubmit)="onConsultarActivo()">
+      <div>
+        <label>Asset ID:</label>
+        <input formControlName="assetID" />
+      </div>
+      <button type="submit" [disabled]="loadingConsulta">
+        {{ loadingConsulta ? 'Consultando...' : 'Consultar Activo' }}
+      </button>
+    </form>
+
+    <div *ngIf="errorConsulta" class="error">
+      <p>Error: {{ errorConsulta }}</p>
+    </div>
+
+    <div *ngIf="resultadoConsulta">
+      <h3>Estado Actual:</h3>
+      <pre>{{ resultadoConsulta | json }}</pre>
+    </div>
+
+    <div *ngIf="resultadoHistorial">
+      <h3>Historial Completo:</h3>
+      <pre>{{ resultadoHistorial | json }}</pre>
+    </div>
+  </section>
+
+</main>
