@@ -5,7 +5,7 @@ El proyecto cuenta con 4 carpetas:
 - **smart-contract:** contiene la lógica del smart-contract `PharmaLedger`.
 - **api:** contiene endpoint que permiten la comunicación del **smart-contract** con el **front**.
 - **front:** tiene la vista básica para la comunicación efectiva con la **api** y el **smart-contract**.
-- **fabric-samples:** utilizada para la simulación en local de las organizaciones para poder levantar el **smart-contract**.
+
 Tiene la siguiente estructura:
 ```text
 tpi-blockchain\
@@ -17,7 +17,7 @@ tpi-blockchain\
 |   | |-- app\
 |-- smart-contract\
 |   |-- src\
-|   |   |- index.ts
+|   |   |-- index.ts
 |   |   |-- medicamento.ts
 |-- REAdme.md
 |__ modelado.md
