@@ -1,63 +1,57 @@
 'use strict';
 
-const express = require('express');
-const cors = require('cors');
-const { connect: connectV1 } = require('@hyperledger/fabric-gateway'); // Solo importamos 'connect'
-const grpc = require('@grpc/grpc-js'); // Importamos el paquete gRPC que acabamos de instalar
-const GrpcClient = grpc.Client; // ¡Esto ahora funcionará!
-const crypto = require('crypto');
-const fs = require('fs').promises;
-const path = require('path');
+import express, { Request, Response, NextFunction } from 'express';
+import cors from 'cors';
+import { connect, Contract, Gateway, Identity, Signer } from '@hyperledger/fabric-gateway';
+import { Client as GrpcClient, credentials as grpcCredentials } from '@grpc/grpc-js';
+import crypto from 'crypto';
+import { promises as fs } from 'fs';
+import path from 'path';
 
 // --- Configuración de la API ---
 const app = express();
-app.use(cors()); // Permite peticiones de otros orígenes (Angular)
-app.use(express.json()); // Permite parsear JSON en el body
-const port = 3000; // Puerto donde correrá tu API
+app.use(cors());
+app.use(express.json());
+const port = 3000;
 
-// --- Configuración de Fabric (de app.js) ---
+// --- Configuración de Fabric ---
 const channelName = 'mychannel';
 const chaincodeName = 'pharma-ledger';
 const mspId = 'Org1MSP';
 
-// Rutas a los materiales
-const cryptoPath = path.resolve(__dirname, '..', '..', 'tpi-blockchain/fabric-samples/test-network', 'organizations', 'peerOrganizations', 'org1.example.com');
+// Rutas
+const cryptoPath = path.resolve(__dirname, '..', '..', '..', 'fabric-samples/test-network', 'organizations', 'peerOrganizations', 'org1.example.com');
 const keyDirectoryPath = path.resolve(cryptoPath, 'users', 'User1@org1.example.com', 'msp', 'keystore');
 const certPath = path.resolve(cryptoPath, 'users', 'User1@org1.example.com', 'msp', 'signcerts', 'cert.pem');
 const tlsCertPath = path.resolve(cryptoPath, 'peers', 'peer0.org1.example.com', 'tls', 'ca.crt');
 const peerEndpoint = 'localhost:7051';
 const peerHostAlias = 'peer0.org1.example.com';
 
-let contract; // Variable global para el contrato
+let contract: Contract;
 
-/**
- * Conecta al Gateway de Fabric y prepara el contrato
- */
-async function initializeFabric() {
+interface CrearMedicamentoBody {
+    assetID: string;
+    nombreComercial: string;
+    lote: string;
+    fechaFabricacion: string;
+    fechaVencimiento: string;
+}
+
+async function initializeFabric(): Promise<void> {
     try {
         console.log('Inicializando conexión con Fabric...');
 
-        // --- Conexión usando el nuevo gRPC Gateway (de app.js) ---
         const client = await newGrpcClient();
-        const gateway = connectV1({
+        const gateway = connect({
             client,
             identity: await newIdentity(),
             signer: await newSigner(),
-            // Opciones de cliente gRPC
-            clientTlsCredentials: {
-                rootCert: await fs.readFile(tlsCertPath),
-            },
-            evaluateOptions: () => ({ deadline: Date.now() + 5000 }), // 5s
-            endorseOptions: () => ({ deadline: Date.now() + 15000 }), // 15s
-            submitOptions: () => ({ deadline: Date.now() + 5000 }), // 5s
-            commitStatusOptions: () => ({ deadline: Date.now() + 60000 }), // 1m
         });
 
         const network = gateway.getNetwork(channelName);
         contract = network.getContract(chaincodeName);
 
         console.log('✅ Conexión con Fabric establecida y contrato "pharma-ledger" listo.');
-        return contract;
 
     } catch (error) {
         console.error('******** FALLÓ LA INICIALIZACIÓN DE FABRIC:');
@@ -68,47 +62,46 @@ async function initializeFabric() {
 
 // --- Endpoints de la API ---
 
-// GET /api/medicamentos/:id (ConsultarActivo)
-app.get('/api/medicamentos/:id', async (req, res) => {
+// GET /api/medicamentos/:id
+app.get('/api/medicamentos/:id', async (req: Request, res: Response) => {
     try {
         const assetID = req.params.id;
         console.log(`Recibida petición GET /api/medicamentos/${assetID}`);
-
         const resultBytes = await contract.evaluateTransaction('ConsultarActivo', assetID);
         const resultJson = JSON.parse(Buffer.from(resultBytes).toString());
-
         res.json(resultJson);
-
     } catch (error) {
         console.error(`Error al consultar activo: ${error}`);
-        res.status(404).json({ error: error.message });
+        res.status(404).json({ error: (error as Error).message });
     }
 });
 
-// GET /api/medicamentos/:id/historial (ConsultarHistorial)
-app.get('/api/medicamentos/:id/historial', async (req, res) => {
+// GET /api/medicamentos/:id/historial
+app.get('/api/medicamentos/:id/historial', async (req: Request, res: Response) => {
     try {
         const assetID = req.params.id;
         console.log(`Recibida petición GET /api/medicamentos/${assetID}/historial`);
-
         const resultBytes = await contract.evaluateTransaction('ConsultarHistorial', assetID);
         const resultJson = JSON.parse(Buffer.from(resultBytes).toString());
-
         res.json(resultJson);
-
     } catch (error) {
         console.error(`Error al consultar historial: ${error}`);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: (error as Error).message });
     }
 });
 
-// POST /api/medicamentos (CrearMedicamento)
-app.post('/api/medicamentos', async (req, res) => {
+// POST /api/medicamentos
+app.post('/api/medicamentos', async (req: Request, res: Response) => {
     try {
-        const { assetID, nombreComercial, lote, fechaFabricacion, fechaVencimiento } = req.body;
-        console.log('Recibida petición POST /api/medicamentos', req.body);
+        const {
+            assetID,
+            nombreComercial,
+            lote,
+            fechaFabricacion,
+            fechaVencimiento
+        } = req.body as CrearMedicamentoBody;
 
-        // Validar input
+        console.log('Recibida petición POST /api/medicamentos', req.body);
         if (!assetID || !nombreComercial || !lote || !fechaFabricacion || !fechaVencimiento) {
             return res.status(400).json({ error: 'Faltan campos obligatorios' });
         }
@@ -123,50 +116,46 @@ app.post('/api/medicamentos', async (req, res) => {
         );
 
         res.status(201).json({ status: 'ok', assetID: assetID });
-
     } catch (error) {
         console.error(`Error al crear medicamento: ${error}`);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: (error as Error).message });
     }
 });
 
 // --- Iniciar Servidor ---
 app.listen(port, async () => {
     await initializeFabric();
-    console.log(`🚀 Servidor API de PharmaLedger escuchando en http://localhost:${port}`);
+    console.log(`🚀 Servidor API de PharmaLedger (TS) escuchando en http://localhost:${port}`);
 });
 
 // --- Funciones Helper de Conexión ---
-async function newGrpcClient() {
+
+async function newGrpcClient(): Promise<GrpcClient> {
     const tlsRootCert = await fs.readFile(tlsCertPath);
-    const tlsCredentials = grpc.credentials.createSsl(tlsRootCert);
+    const tlsCredentials = grpcCredentials.createSsl(tlsRootCert);
+
     return new GrpcClient(peerEndpoint, tlsCredentials, {
         'grpc.ssl_target_name_override': peerHostAlias,
     });
 }
 
-async function newIdentity() {
+async function newIdentity(): Promise<Identity> {
     const credentials = await fs.readFile(certPath);
     return { mspId, credentials };
 }
 
-/* async function newSigner() {
-    const files = await fs.readdir(keyDirectoryPath);
-    const keyPath = path.resolve(keyDirectoryPath, files[0]);
-    const privateKeyPem = await fs.readFile(keyPath);
-    const privateKey = crypto.createPrivateKey(privateKeyPem);
-    return crypto.createSign(null).update(Buffer.alloc(0)).sign.bind(undefined, privateKey);
-} */
-async function newSigner() {
+// La función 'Signer' (firmante) debe ser una función que toma un 'digest' (hash)
+// y devuelve una 'signature' (firma).
+async function newSigner(): Promise<Signer> {
     const files = await fs.readdir(keyDirectoryPath);
     const keyPath = path.resolve(keyDirectoryPath, files[0]);
     const privateKeyPem = await fs.readFile(keyPath);
     const privateKey = crypto.createPrivateKey(privateKeyPem);
 
-    // Devuelve una FUNCIÓN que el gateway usará para firmar
-    return (digest) => {
-        // Usa crypto.sign(null, ...) para firmar el digest (hash)
-        // que nos pasa el gateway, sin volver a hashearlo.
-        return crypto.sign(null, digest, privateKey);
+    return async (digest: Uint8Array): Promise<Uint8Array> => {
+        const sign = crypto.createSign('SHA256');
+        sign.update(digest);
+        const signature = sign.sign(privateKey);
+        return signature;
     };
 }

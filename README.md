@@ -10,21 +10,29 @@ Tiene la siguiente estructura:
 ```text
 tpi-blockchain\
 |-- api\
-|   |- server.js
-|-- fabric-samples\
+|   |-- src\
+|   |   |-- server.ts
 |-- front\
-|   |-src\
-|   | |-app\
-
+|   |-- src\
+|   | |-- app\
 |-- smart-contract\
-|   |-index.js
+|   |-- src\
+|   |   |- index.ts
+|   |   |-- medicamento.ts
 |- REAdme.md
 |- modelado.md
 ```
+## Requisitos previos
+### Clonar repositorio fabric-samples
+``git clone https://github.com/hyperledger/fabric-samples.git``
+### Descarga las Imágenes de Fabric
+``cd fabric-samples``
+``curl -sSL https://raw.githubusercontent.com/hyperledger/fabric/main/scripts/bootstrap.sh | bash -s``
+
 ## Pasos para levantar el proyecto
 ### Paso 1: Levantar la Red Fabric y Desplegar el Chaincode
 #### 1. Ve al directorio de la test-network
-``cd tpi-blockchain/test-network``
+``cd fabric-samples/test-network``
 #### 2. Limpia ejecuciones anteriores (si las hay)
 ``./network.sh down``
 #### 3. Levanta la red (con Certificate Authorities)

@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { PharmaLedger } from './services/pharma-ledger';
+import { PharmaLedger } from './servicios/pharma-ledger';
 import { finalize } from 'rxjs';
 import { CommonModule, JsonPipe } from '@angular/common';
 

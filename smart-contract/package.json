@@ -2,15 +2,21 @@
     "name": "smart-contract",
     "version": "1.0.0",
     "description": "Contrato PharmaLedger en Javascript",
-    "main": "index.js",
+    "main": "dist/index.js",
+    "typings": "dist/index.d.ts",
     "engines": {
-        "node": ">=18"
+        "node": ">=24"
     },
     "dependencies": {
         "fabric-contract-api": "^2.5.5",
         "fabric-shim": "^2.5.5"
     },
+    "devDependencies": {
+        "@types/node": "^24.8.0",
+        "typescript": "^5.9.3"
+    },
     "scripts": {
+        "build": "tsc",
         "start": "fabric-chaincode-node start"
     }
 }

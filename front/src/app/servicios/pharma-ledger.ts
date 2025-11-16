@@ -6,7 +6,6 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class PharmaLedger {
-  // Gracias al proxy, solo llamamos a '/api'
   private apiUrl = '/api';
 
   constructor(private http: HttpClient) {}
