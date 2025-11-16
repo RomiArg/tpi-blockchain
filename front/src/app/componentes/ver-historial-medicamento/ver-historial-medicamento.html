@@ -1,1 +1,47 @@
-<p>ver-historial-medicamento works!</p>
+<h1 mat-dialog-title>Trazabilidad del Activo</h1>
+<h2 mat-dialog-title class="subtitle">{{ data.assetID }}</h2>
+
+<mat-dialog-content>
+    <mat-card class="info-card">
+        <mat-card-header>
+            <mat-card-title>{{ data.nombreComercial }}</mat-card-title>
+            <mat-card-subtitle>Lote: {{ data.lote }}</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+            <p><strong>Estado Actual:</strong> {{ estadoMap[data.estadoActual] }}</p>
+            <p><strong>Propietario Actual:</strong> {{ data.propietarioActual }}</p>
+            <p><strong>Vencimiento:</strong> {{ data.fechaVencimiento | date:'dd/MM/yyyy' }}</p>
+        </mat-card-content>
+    </mat-card>
+
+    <h3>Historial de Transacciones</h3>
+
+    @if (cargando) {
+        <div class="spinner-container">
+            <mat-spinner [diameter]="40"></mat-spinner>
+        </div>
+    }
+
+    <mat-list>
+        @for (item of (historial | async); track item.txId) {
+            <mat-list-item class="history-item">
+                <mat-icon matListItemIcon>check_circle</mat-icon>
+                <div matListItemTitle class="tx-id">TX-ID: {{ item.txId.substring(0, 20) }}...</div>
+                <div matListItemLine>
+                <span><strong>Estado:</strong> {{ estadoMap[item.valor.estadoActual] }}</span>
+                </div>
+                <div matListItemLine>
+                <span><strong>Propietario:</strong> {{ item.valor.propietarioActual }}</span>
+                </div>
+                <div matListItemLine>
+                <span><strong>Fecha:</strong> {{ item.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</span>
+                </div>
+            </mat-list-item>
+        }
+    </mat-list>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-button (click)="onClose()">Cerrar</button>
+</mat-dialog-actions>

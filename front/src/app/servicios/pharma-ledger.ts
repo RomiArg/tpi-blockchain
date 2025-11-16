@@ -10,6 +10,10 @@ export class PharmaLedger {
 
   constructor(private http: HttpClient) {}
 
+  consultarTodos(): Observable<any[]> {
+      return this.http.get<any[]>(`${this.apiUrl}/medicamentos`);
+  }
+
   consultarActivo(id: string): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/medicamentos/${id}`);
   }

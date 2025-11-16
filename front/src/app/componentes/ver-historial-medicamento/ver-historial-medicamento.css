@@ -1,0 +1,27 @@
+.subtitle {
+    font-size: 1em;
+    color: grey;
+    margin-top: -20px;
+}
+
+.info-card {
+    background-color: #f9f9f9;
+    margin-bottom: 20px;
+}
+
+.spinner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.history-item {
+    border-bottom: 1px solid #eee;
+}
+
+.tx-id {
+    font-family: monospace;
+    font-size: 0.9em;
+    color: #555;
+}

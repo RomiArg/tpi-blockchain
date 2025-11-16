@@ -44,6 +44,61 @@ export class PharmaLedger extends Contract {
     }
 
     // --- Transacciones ---
+
+    /**
+     * InitLedger: Se llama una sola vez al desplegar el chaincode.
+     * Carga un conjunto inicial de medicamentos en el ledger.
+     */
+    public async InitLedger(ctx: Context): Promise<void> {
+        console.info('============= INICIANDO: Carga de datos iniciales (InitLedger) =============');
+
+        const medicamentosIniciales: Medicamento[] = [
+            {
+                assetID: 'MED-1001',
+                nombreComercial: 'DrogaOncologica-A',
+                lote: 'LOTE-001',
+                fechaFabricacion: new Date('2025-01-10T10:00:00Z').toISOString(),
+                fechaVencimiento: new Date('2026-01-10T10:00:00Z').toISOString(),
+                estadoActual: Estado.CREADO,
+                propietarioActual: 'Org1MSP',
+                historialDeCustodia: [
+                    {
+                        timestamp: new Date().toISOString(),
+                        actor: 'Org1MSP',
+                        accion: 'CREADO',
+                        ubicacion: 'Planta de Producción',
+                    }
+                ],
+                docType: 'Medicamento',
+            },
+            {
+                assetID: 'MED-1002',
+                nombreComercial: 'DrogaInmunologica-B',
+                lote: 'LOTE-002',
+                fechaFabricacion: new Date('2025-02-15T10:00:00Z').toISOString(),
+                fechaVencimiento: new Date('2026-02-15T10:00:00Z').toISOString(),
+                estadoActual: Estado.CREADO,
+                propietarioActual: 'Org1MSP',
+                historialDeCustodia: [
+                    {
+                        timestamp: new Date().toISOString(),
+                        actor: 'Org1MSP',
+                        accion: 'CREADO',
+                        ubicacion: 'Planta de Producción',
+                    }
+                ],
+                docType: 'Medicamento',
+            },
+        ];
+
+        for (const med of medicamentosIniciales) {
+            await ctx.stub.putState(med.assetID, Buffer.from(JSON.stringify(med)));
+            console.info(`Activo ${med.assetID} inicializado`);
+        }
+
+        console.info('============= COMPLETADO: Carga de datos iniciales =============');
+    }
+
     public async CrearMedicamento(
         ctx: Context,
         assetID: string,
@@ -192,6 +247,39 @@ export class PharmaLedger extends Contract {
         }
         await iterator.close();
         return JSON.stringify(historial);
+    }
+
+    /**
+     * ConsultarTodosLosMedicamentos: Devuelve todos los activos con docType 'Medicamento'.
+     */
+    public async ConsultarTodosLosMedicamentos(ctx: Context): Promise<string> {
+        const queryString = {
+            selector: {
+                docType: 'Medicamento'
+            }
+        };
+
+        const iterator = await ctx.stub.getQueryResult(JSON.stringify(queryString));
+        const allResults = [];
+        let result = await iterator.next();
+
+        while (!result.done) {
+            if (result.value) {
+                const strValue = Buffer.from(result.value.value.toString()).toString('utf8');
+                let record;
+                try {
+                    record = JSON.parse(strValue);
+                } catch (err) {
+                    console.log(err);
+                    record = strValue;
+                }
+                allResults.push(record);
+            }
+            result = await iterator.next();
+        }
+
+        await iterator.close();
+        return JSON.stringify(allResults);
     }
 }
 

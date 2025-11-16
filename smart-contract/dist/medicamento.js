@@ -1,7 +1,6 @@
-"use strict";
+'use strict';
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Medicamento = exports.RegistroHistorial = exports.Estado = void 0;
-// Enumerador de estados
+exports.Estado = void 0;
 var Estado;
 (function (Estado) {
     Estado[Estado["CREADO"] = 0] = "CREADO";
@@ -11,12 +10,4 @@ var Estado;
     Estado[Estado["RECIBIDO_SALUD"] = 4] = "RECIBIDO_SALUD";
     Estado[Estado["DESPACHADO_PACIENTE"] = 5] = "DESPACHADO_PACIENTE";
 })(Estado || (exports.Estado = Estado = {}));
-// Estructura para el historial [cite: 144]
-class RegistroHistorial {
-}
-exports.RegistroHistorial = RegistroHistorial;
-// Estructura de datos principal del activo 
-class Medicamento {
-}
-exports.Medicamento = Medicamento;
 //# sourceMappingURL=medicamento.js.map

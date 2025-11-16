@@ -10,6 +10,7 @@
 .welcome-card {
     max-width: 600px;
     width: 100%;
+    margin-top: 20px;
 }
 
 .hero-image {
@@ -22,6 +23,7 @@
 .action-btn {
     padding: 10px 20px;
     font-size: 1.1em;
+    margin: 10px;
 }
 
 ul {

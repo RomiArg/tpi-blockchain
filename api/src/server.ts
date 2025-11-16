@@ -1,12 +1,15 @@
 'use strict';
 
-import express, { Request, Response, NextFunction } from 'express';
+import * as dotenv from 'dotenv';
+import path from 'path';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
-import { connect, Contract, Gateway, Identity, Signer } from '@hyperledger/fabric-gateway';
+import { connect, Contract, Identity, Signer } from '@hyperledger/fabric-gateway';
 import { Client as GrpcClient, credentials as grpcCredentials } from '@grpc/grpc-js';
 import crypto from 'crypto';
 import { promises as fs } from 'fs';
-import path from 'path';
+
+dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 
 // --- Configuración de la API ---
 const app = express();
@@ -15,17 +18,32 @@ app.use(express.json());
 const port = 3000;
 
 // --- Configuración de Fabric ---
-const channelName = 'mychannel';
-const chaincodeName = 'pharma-ledger';
-const mspId = 'Org1MSP';
+const channelName = process.env.CHANNEL_NAME || 'mychannel';
+const chaincodeName = process.env.CHAINCODE_NAME || 'pharma-ledger';
+const mspId = process.env.MSP_ID || 'Org1MSP';
+const peerEndpoint = process.env.PEER_ENDPOINT || 'localhost:7051';
+const peerHostAlias = process.env.PEER_HOST_ALIAS || 'peer0.org1.example.com';
 
-// Rutas
-const cryptoPath = path.resolve(__dirname, '..', '..', '..', 'fabric-samples/test-network', 'organizations', 'peerOrganizations', 'org1.example.com');
+// --- Rutas ---
+const cryptoPathOrg1 = process.env.CRYPTO_PATH_ORG1;
+if (!cryptoPathOrg1) {
+    console.error('Error: La variable CRYPTO_PATH_ORG1 no está definida en .env');
+    process.exit(1);
+}
+
+// Construimos las rutas absolutas
+const projectRoot = path.resolve(__dirname, '..', '..');
+const cryptoPath = path.resolve(projectRoot, cryptoPathOrg1);
+
 const keyDirectoryPath = path.resolve(cryptoPath, 'users', 'User1@org1.example.com', 'msp', 'keystore');
-const certPath = path.resolve(cryptoPath, 'users', 'User1@org1.example.com', 'msp', 'signcerts', 'cert.pem');
+const certDirectoryPath = path.resolve(cryptoPath, 'users', 'User1@org1.example.com', 'msp', 'signcerts');
+// const certPath = path.resolve(cryptoPath, 'users', 'User1@org1.example.com', 'msp', 'signcerts', 'cert.pem');
 const tlsCertPath = path.resolve(cryptoPath, 'peers', 'peer0.org1.example.com', 'tls', 'ca.crt');
-const peerEndpoint = 'localhost:7051';
-const peerHostAlias = 'peer0.org1.example.com';
+
+// const keyDirectoryPath = path.resolve(cryptoPath, 'users', 'Admin@org1.example.com', 'msp', 'keystore');
+// const certPath = path.resolve(cryptoPath, 'users', 'Admin@org1.example.com', 'msp', 'signcerts', 'cert.pem');
+// const tlsCertPath = path.resolve(cryptoPath, 'peers', 'peer0.org1.example.com', 'tls', 'ca.crt');
+
 
 let contract: Contract;
 
@@ -40,6 +58,7 @@ interface CrearMedicamentoBody {
 async function initializeFabric(): Promise<void> {
     try {
         console.log('Inicializando conexión con Fabric...');
+        console.log(`Usando Crypto Path: ${cryptoPath}`);
 
         const client = await newGrpcClient();
         const gateway = connect({
@@ -60,7 +79,71 @@ async function initializeFabric(): Promise<void> {
     }
 }
 
+/* async function initializeFabric(): Promise<void> {
+    try {
+        console.log('Inicializando conexión con Fabric...');
+        console.log('Inicializando conexión con Fabric...');
+        console.log(`Usando Crypto Path: ${cryptoPath}`);
+
+        const client = await newGrpcClient();
+        const gateway = connect({
+            client,
+            identity: await newIdentity(),
+            signer: await newSigner(),
+        });
+
+        const network = gateway.getNetwork(channelName);
+        contract = network.getContract(chaincodeName);
+
+        console.log('✅ Conexión con Fabric establecida y contrato "pharma-ledger" listo.');
+
+        // --- INICIO: LÓGICA DE SEEDING (IDEMPOTENTE) ---
+        try {
+            // 1. Intenta consultar un activo "semilla"
+            console.log('Verificando datos iniciales (seeding)...');
+            await contract.evaluateTransaction('ConsultarActivo', 'MED-SEED-001');
+            console.log('✅ Datos iniciales ya existen.');
+
+        } catch (error: any) {
+            // 2. Si falla (porque no existe), lo crea.
+            if (error.message.includes('no existe')) {
+                console.log('Datos iniciales no encontrados. Creando...');
+                await contract.submitTransaction(
+                    'CrearMedicamento',
+                    'MED-SEED-001',
+                    'Medicamento Semilla',
+                    'LOTE-SEED',
+                    new Date().toISOString(),
+                    new Date(Date.now() + 365*24*60*60*1000).toISOString() // Vence en 1 año
+                );
+                console.log('✅ Datos iniciales creados (MED-SEED-001).');
+            } else {
+                // Si es un error diferente (ej. sin permisos), muéstralo
+                console.error('Error al verificar datos iniciales:', error.message);
+            }
+        }
+        // --- FIN: LÓGICA DE SEEDING ---
+
+    } catch (error) {
+        console.error('******** FALLÓ LA INICIALIZACIÓN DE FABRIC:');
+        console.error(error);
+        process.exit(1);
+    }
+} */
+
 // --- Endpoints de la API ---
+// GET /api/medicamentos
+app.get('/api/medicamentos', async (req: Request, res: Response) => {
+    try {
+        console.log('Recibida petición GET /api/medicamentos (todos)');
+        const resultBytes = await contract.evaluateTransaction('ConsultarTodosLosMedicamentos');
+        const resultJson = JSON.parse(Buffer.from(resultBytes).toString());
+        res.json(resultJson);
+    } catch (error) {
+        console.error(`Error al consultar todos los medicamentos: ${error}`);
+        res.status(500).json({ error: (error as Error).message });
+    }
+});
 
 // GET /api/medicamentos/:id
 app.get('/api/medicamentos/:id', async (req: Request, res: Response) => {
@@ -140,6 +223,8 @@ async function newGrpcClient(): Promise<GrpcClient> {
 }
 
 async function newIdentity(): Promise<Identity> {
+    const certFiles = await fs.readdir(certDirectoryPath);
+    const certPath = path.resolve(certDirectoryPath, certFiles[0]);
     const credentials = await fs.readFile(certPath);
     return { mspId, credentials };
 }

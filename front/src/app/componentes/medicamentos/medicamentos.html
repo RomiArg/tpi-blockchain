@@ -1,1 +1,70 @@
-<p>medicamentos works!</p>
+<mat-card color="primary">
+    <mat-card-header>
+        <mat-card-title>
+            <mat-icon>local_pharmacy</mat-icon>
+            Medicamentos
+        </mat-card-title>
+        <span class="toolbar-spacer"></span>
+        <button mat-stroked-button (click)="onConsultarTodos()" [disabled]="cargando">
+            <mat-icon>refresh</mat-icon>
+            Recargar Lista
+        </button>
+        <button mat-raised-button color="accent" (click)="openCreateDialog()" style="margin-left: 15px;">
+            <mat-icon>add</mat-icon>
+            Crear Medicamento
+        </button>
+    </mat-card-header>
+</mat-card>
+
+<div class="content">
+    @if (cargando) {
+        <div class="loading-container">
+            <mat-spinner></mat-spinner>
+            <p>Cargando inventario de medicamentos...</p>
+        </div>
+    }
+
+    <div class="table-container" [hidden]="cargando">
+        <table mat-table [dataSource]="medicamentos" matSort>
+            <ng-container matColumnDef="assetID">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Asset ID </th>
+                <td mat-cell *matCellDef="let med"> {{ med.assetID }} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="nombreComercial">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Nombre </th>
+                <td mat-cell *matCellDef="let med"> {{ med.nombreComercial }} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="lote">
+                <th mat-header-cell *matHeaderCellDef> Lote </th>
+                <td mat-cell *matCellDef="let med"> {{ med.lote }} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="estadoActual">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Estado </th>
+                <td mat-cell *matCellDef="let med"> {{ estadoMap[med.estadoActual] || 'Desconocido' }} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="propietarioActual">
+                <th mat-header-cell *matHeaderCellDef> Propietario </th>
+                <td mat-cell *matCellDef="let med"> {{ med.propietarioActual }} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef> Trazabilidad </th>
+                <td mat-cell *matCellDef="let med">
+                    <button mat-icon-button color="primary" (click)="openHistoryDialog(med)" title="Ver Historial">
+                        <mat-icon>history</mat-icon>
+                    </button>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+            <tr mat-row *matRowDef="let row; columns: columnas;"></tr>
+        </table>
+
+        <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons>
+        </mat-paginator>
+    </div>
+</div>

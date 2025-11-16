@@ -6,13 +6,16 @@ export declare enum Estado {
     RECIBIDO_SALUD = 4,
     DESPACHADO_PACIENTE = 5
 }
-export declare class RegistroHistorial {
+export interface RegistroHistorial {
     timestamp: string;
     actor: string;
     accion: string;
     ubicacion: string;
 }
-export declare class Medicamento {
+/**
+ * Define la estructura de datos principal del activo.
+ */
+export interface Medicamento {
     assetID: string;
     nombreComercial: string;
     lote: string;

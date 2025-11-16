@@ -1,6 +1,12 @@
+# Ignorar dependencias
 api/node_modules/
 front/node_modules/
 smart-contract/node_modules/
+
+# Ignorar variables de entorno
+api/.env
+
+# Ignorar configuraciones de vscode
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
