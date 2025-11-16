@@ -12,9 +12,10 @@ class PharmaLedger extends fabric_contract_api_1.Contract {
     _getMSPID(ctx) {
         return ctx.clientIdentity.getMSPID();
     }
-    _agregarHistorial(medicamento, actorMSPID, accion, ubicacion) {
+    _agregarHistorial(ctx, medicamento, actorMSPID, accion, ubicacion) {
+        const txTimestamp = new Date(ctx.stub.getTxTimestamp().seconds.low * 1000).toISOString();
         const registro = {
-            timestamp: new Date().toISOString(),
+            timestamp: txTimestamp,
             actor: actorMSPID,
             accion: accion,
             ubicacion: ubicacion,
@@ -42,6 +43,7 @@ class PharmaLedger extends fabric_contract_api_1.Contract {
      */
     async InitLedger(ctx) {
         console.info('============= INICIANDO: Carga de datos iniciales (InitLedger) =============');
+        const txTimestamp = new Date(ctx.stub.getTxTimestamp().seconds.low * 1000).toISOString();
         const medicamentosIniciales = [
             {
                 assetID: 'MED-1001',
@@ -53,7 +55,7 @@ class PharmaLedger extends fabric_contract_api_1.Contract {
                 propietarioActual: 'Org1MSP',
                 historialDeCustodia: [
                     {
-                        timestamp: new Date().toISOString(),
+                        timestamp: txTimestamp, // <-- CORREGIDO
                         actor: 'Org1MSP',
                         accion: 'CREADO',
                         ubicacion: 'Planta de Producción',
@@ -71,7 +73,7 @@ class PharmaLedger extends fabric_contract_api_1.Contract {
                 propietarioActual: 'Org1MSP',
                 historialDeCustodia: [
                     {
-                        timestamp: new Date().toISOString(),
+                        timestamp: txTimestamp, // <-- CORREGIDO
                         actor: 'Org1MSP',
                         accion: 'CREADO',
                         ubicacion: 'Planta de Producción',
@@ -109,7 +111,7 @@ class PharmaLedger extends fabric_contract_api_1.Contract {
             propietarioActual: actorMSPID,
             historialDeCustodia: [],
         };
-        this._agregarHistorial(medicamento, actorMSPID, 'CREADO', 'Planta de Producción');
+        this._agregarHistorial(ctx, medicamento, actorMSPID, 'CREADO', 'Planta de Producción');
         // 4. Guardar en el Ledger
         await ctx.stub.putState(assetID, Buffer.from(JSON.stringify(medicamento)));
     }
@@ -123,12 +125,12 @@ class PharmaLedger extends fabric_contract_api_1.Contract {
         if (medicamento.estadoActual === medicamento_1.Estado.CREADO) {
             medicamento.estadoActual = medicamento_1.Estado.EN_TRANSITO_LAB_A_LOGISTICA;
             medicamento.propietarioActual = nuevoPropietarioMSPID;
-            this._agregarHistorial(medicamento, actorMSPID, 'TRANSFERIDO_A_LOGISTICA', 'En Tránsito');
+            this._agregarHistorial(ctx, medicamento, actorMSPID, 'TRANSFERIDO_A_LOGISTICA', 'En Tránsito');
         }
         else if (medicamento.estadoActual === medicamento_1.Estado.ALMACENADO_LOGISTICA) {
             medicamento.estadoActual = medicamento_1.Estado.EN_TRANSITO_LOGISTICA_A_SALUD;
             medicamento.propietarioActual = nuevoPropietarioMSPID;
-            this._agregarHistorial(medicamento, actorMSPID, 'TRANSFERIDO_A_SALUD', 'En Tránsito');
+            this._agregarHistorial(ctx, medicamento, actorMSPID, 'TRANSFERIDO_A_SALUD', 'En Tránsito');
         }
         else {
             throw new Error(`Error de estado: no se puede transferir un activo en estado '${medicamento_1.Estado[medicamento.estadoActual]}'`);
@@ -144,11 +146,11 @@ class PharmaLedger extends fabric_contract_api_1.Contract {
         // Lógica DTE
         if (medicamento.estadoActual === medicamento_1.Estado.EN_TRANSITO_LAB_A_LOGISTICA) {
             medicamento.estadoActual = medicamento_1.Estado.ALMACENADO_LOGISTICA;
-            this._agregarHistorial(medicamento, actorMSPID, 'RECIBIDO_LOGISTICA', ubicacion);
+            this._agregarHistorial(ctx, medicamento, actorMSPID, 'RECIBIDO_LOGISTICA', ubicacion);
         }
         else if (medicamento.estadoActual === medicamento_1.Estado.EN_TRANSITO_LOGISTICA_A_SALUD) {
             medicamento.estadoActual = medicamento_1.Estado.RECIBIDO_SALUD;
-            this._agregarHistorial(medicamento, actorMSPID, 'RECIBIDO_SALUD', ubicacion);
+            this._agregarHistorial(ctx, medicamento, actorMSPID, 'RECIBIDO_SALUD', ubicacion);
         }
         else {
             throw new Error(`Error de estado: no se puede recibir un activo en estado '${medicamento_1.Estado[medicamento.estadoActual]}'`);
@@ -169,7 +171,7 @@ class PharmaLedger extends fabric_contract_api_1.Contract {
         }
         medicamento.estadoActual = medicamento_1.Estado.DESPACHADO_PACIENTE;
         medicamento.propietarioActual = 'PACIENTE';
-        this._agregarHistorial(medicamento, actorMSPID, `DESPACHADO_PACIENTE (ID: ${idPaciente})`, 'Farmacia Hospital');
+        this._agregarHistorial(ctx, medicamento, actorMSPID, `DESPACHADO_PACIENTE (ID: ${idPaciente})`, 'Farmacia Hospital');
         await ctx.stub.putState(assetID, Buffer.from(JSON.stringify(medicamento)));
     }
     // --- Consultas ---

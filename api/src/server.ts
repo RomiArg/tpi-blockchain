@@ -35,17 +35,22 @@ if (!cryptoPathOrg1) {
 const projectRoot = path.resolve(__dirname, '..', '..');
 const cryptoPath = path.resolve(projectRoot, cryptoPathOrg1);
 
-const keyDirectoryPath = path.resolve(cryptoPath, 'users', 'User1@org1.example.com', 'msp', 'keystore');
-const certDirectoryPath = path.resolve(cryptoPath, 'users', 'User1@org1.example.com', 'msp', 'signcerts');
+// const keyDirectoryPath = path.resolve(cryptoPath, 'users', 'User1@org1.example.com', 'msp', 'keystore');
+// const certDirectoryPath = path.resolve(cryptoPath, 'users', 'User1@org1.example.com', 'msp', 'signcerts');
 // const certPath = path.resolve(cryptoPath, 'users', 'User1@org1.example.com', 'msp', 'signcerts', 'cert.pem');
-const tlsCertPath = path.resolve(cryptoPath, 'peers', 'peer0.org1.example.com', 'tls', 'ca.crt');
-
-// const keyDirectoryPath = path.resolve(cryptoPath, 'users', 'Admin@org1.example.com', 'msp', 'keystore');
-// const certPath = path.resolve(cryptoPath, 'users', 'Admin@org1.example.com', 'msp', 'signcerts', 'cert.pem');
 // const tlsCertPath = path.resolve(cryptoPath, 'peers', 'peer0.org1.example.com', 'tls', 'ca.crt');
+
+const keyDirectoryPath = path.resolve(cryptoPath, 'users', 'Admin@org1.example.com', 'msp', 'keystore');
+const certDirectoryPath = path.resolve(cryptoPath, 'users', 'Admin@org1.example.com', 'msp', 'signcerts');
+// const certPath = path.resolve(cryptoPath, 'users', 'Admin@org1.example.com', 'msp', 'signcerts', 'cert.pem');
+const tlsCertPath = path.resolve(cryptoPath, 'peers', 'peer0.org1.example.com', 'tls', 'ca.crt');
 
 
 let contract: Contract;
+
+console.log('*************************************************');
+console.log('DEBUG: Usando esta identidad:', certDirectoryPath);
+console.log('*************************************************');
 
 interface CrearMedicamentoBody {
     assetID: string;
@@ -55,7 +60,7 @@ interface CrearMedicamentoBody {
     fechaVencimiento: string;
 }
 
-async function initializeFabric(): Promise<void> {
+/* async function initializeFabric(): Promise<void> {
     try {
         console.log('Inicializando conexión con Fabric...');
         console.log(`Usando Crypto Path: ${cryptoPath}`);
@@ -68,7 +73,7 @@ async function initializeFabric(): Promise<void> {
         });
 
         const network = gateway.getNetwork(channelName);
-        contract = network.getContract(chaincodeName);
+        contract = network.getContract(chaincodeName, 'PharmaLedger');
 
         console.log('✅ Conexión con Fabric establecida y contrato "pharma-ledger" listo.');
 
@@ -77,9 +82,9 @@ async function initializeFabric(): Promise<void> {
         console.error(error);
         process.exit(1);
     }
-}
+} */
 
-/* async function initializeFabric(): Promise<void> {
+async function initializeFabric(): Promise<void> {
     try {
         console.log('Inicializando conexión con Fabric...');
         console.log('Inicializando conexión con Fabric...');
@@ -93,7 +98,7 @@ async function initializeFabric(): Promise<void> {
         });
 
         const network = gateway.getNetwork(channelName);
-        contract = network.getContract(chaincodeName);
+        contract = network.getContract(chaincodeName, 'PharmaLedger');
 
         console.log('✅ Conexión con Fabric establecida y contrato "pharma-ledger" listo.');
 
@@ -101,11 +106,19 @@ async function initializeFabric(): Promise<void> {
         try {
             // 1. Intenta consultar un activo "semilla"
             console.log('Verificando datos iniciales (seeding)...');
-            await contract.evaluateTransaction('ConsultarActivo', 'MED-SEED-001');
+            await contract.evaluateTransaction('ConsultarActivo', 'MED-SEED-1001');
             console.log('✅ Datos iniciales ya existen.');
 
         } catch (error: any) {
-            // 2. Si falla (porque no existe), lo crea.
+            if (error.message.includes('no existe')) {
+                console.log('Datos iniciales no encontrados. Ejecutando InitLedger...');
+                // Ejecuta InitLedger para poblar la base de datos
+                await contract.submitTransaction('InitLedger');
+                console.log('✅ Datos iniciales creados (InitLedger).');
+            } else {
+                console.error('Error al verificar datos iniciales:', error.message);
+            }
+            /* // 2. Si falla (porque no existe), lo crea.
             if (error.message.includes('no existe')) {
                 console.log('Datos iniciales no encontrados. Creando...');
                 await contract.submitTransaction(
@@ -120,7 +133,7 @@ async function initializeFabric(): Promise<void> {
             } else {
                 // Si es un error diferente (ej. sin permisos), muéstralo
                 console.error('Error al verificar datos iniciales:', error.message);
-            }
+            } */
         }
         // --- FIN: LÓGICA DE SEEDING ---
 
@@ -129,7 +142,7 @@ async function initializeFabric(): Promise<void> {
         console.error(error);
         process.exit(1);
     }
-} */
+}
 
 // --- Endpoints de la API ---
 // GET /api/medicamentos
