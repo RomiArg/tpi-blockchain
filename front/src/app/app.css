@@ -1,35 +1,8 @@
-.home-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 80vh;
-    padding: 20px;
-    background-color: #f0f2f5;
+.gradient-toolbar {
+    background: linear-gradient(90deg, #03a9f4 0%, #673ab7 100%);
+    color: white;
 }
 
-.welcome-card {
-    max-width: 600px;
-    width: 100%;
-}
-
-.hero-image {
-    padding: 20px;
-    max-height: 200px;
-    object-fit: contain;
-    background: white;
-}
-
-.action-btn {
-    padding: 10px 20px;
-    font-size: 1.1em;
-}
-
-ul {
-    list-style-type: none;
-    padding-left: 0;
-}
-
-li {
-    margin-bottom: 5px;
-    color: #555;
+.btn-toolbar {
+    color: white !important;
 }

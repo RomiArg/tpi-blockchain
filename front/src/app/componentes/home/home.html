@@ -1,21 +1,29 @@
 <div class="home-container">
-
-    <mat-card class="info-card">
+    <mat-card class="main-card">
         <mat-card-header>
             <mat-card-title>
-                <mat-icon>flag</mat-icon>
-                Objetivo del Proyecto
+                <mat-icon>school</mat-icon>
+                Información Académica
             </mat-card-title>
-            <mat-card-subtitle>Caso de uso: PharmaLedger</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
-            <p>
-                Garantizar la trazabilidad y la integridad de un medicamento de alto costo (ej. oncológico o de tratamiento especial) desde su producción en el laboratorio hasta su dispensa a un paciente en un centro de salud.
-            </p>
+            <h3>Desarrollo con Tecnologías Blockchain</h3>
 
             <mat-divider></mat-divider>
 
-            <h4><mat-icon>people</mat-icon> Integrantes (5k3 - 2025):</h4>
+            <h3>Trabajo Práctico Integrador</h3>
+
+            <mat-divider></mat-divider>
+
+            <h3>Profesores:</h3>
+            <ul>
+                <li><mat-icon>supervisor_account</mat-icon> Doc. Oscar C. Medina</li>
+                <li><mat-icon>supervisor_account</mat-icon> Esp. Rubén A. Romero</li>
+            </ul>
+
+            <mat-divider></mat-divider>
+
+            <h3><mat-icon>people</mat-icon> Integrantes (5k3 - 2025):</h3>
             <ul>
                 <li><mat-icon>person</mat-icon> 85410 - Argañaraz, Romina Micaela</li>
                 <li><mat-icon>person</mat-icon> 89863 - Donato, Nicolás</li>
@@ -24,7 +32,22 @@
         </mat-card-content>
     </mat-card>
 
-    <mat-card class="info-card">
+    <mat-card class="info-card card-objetivo">
+        <mat-card-header>
+            <mat-card-title>
+                <mat-icon>flag</mat-icon>
+                Objetivo del Proyecto
+            </mat-card-title>
+            <mat-card-subtitle>Caso de uso: PharmaLedger</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+            <h3>
+                Garantizar la trazabilidad y la integridad de un medicamento de alto costo (ej. oncológico o de tratamiento especial) desde su producción en el laboratorio hasta su dispensa a un paciente en un centro de salud.
+            </h3>
+        </mat-card-content>
+    </mat-card>
+
+    <mat-card class="info-card card-tecnologia">
         <mat-card-header>
             <mat-card-title>
                 <mat-icon>memory</mat-icon>
@@ -34,58 +57,56 @@
         <mat-card-content>
             <h4>Blockchain (Modelado y Contrato)</h4>
             <mat-chip-listbox aria-label="Tecnologías Blockchain">
-                <mat-chip-option color="primary" selected>Hyperledger Fabric (v2.x)</mat-chip-option>
-                <mat-chip-option color="primary" selected>Go (Golang)</mat-chip-option>
-                <mat-chip-option color="accent" selected>TypeScript (Chaincode Wrapper)</mat-chip-option>
+            <mat-chip-option color="primary" selected>
+                <img src="https://hyperledger-fabric.readthedocs.io/en/release-2.5/_images/hyperledger_fabric_logo_color.png" alt="Hyperledger" class="chip-logo">
+                Hyperledger Fabric (v2.x)
+            </mat-chip-option>
+                <mat-chip-option color="primary" selected>
+                    <img src="https://cdn.worldvectorlogo.com/logos/go-6.svg" alt="Go" class="chip-logo">
+                    Go (Golang)
+                </mat-chip-option>
+                <mat-chip-option color="accent" selected>
+                    <img src="https://cdn.worldvectorlogo.com/logos/typescript.svg" alt="TypeScript" class="chip-logo">
+                    TypeScript (Chaincode Wrapper)
+                </mat-chip-option>
             </mat-chip-listbox>
 
             <h4 style="margin-top: 15px;">Aplicación (API y Front)</h4>
             <mat-chip-listbox aria-label="Tecnologías Web">
-                <mat-chip-option color="accent" selected>Node.js / Express (API)</mat-chip-option>
-                <mat-chip-option color="warn" selected>Angular (Frontend)</mat-chip-option>
+                <mat-chip-option color="accent" selected>
+                    <img src="https://cdn.worldvectorlogo.com/logos/nodejs-icon.svg" alt="Node.js" class="chip-logo">
+                    Node.js / Express (API)
+                </mat-chip-option>
+                <mat-chip-option color="warn" selected>
+                    <img src="https://cdn.worldvectorlogo.com/logos/angular-icon-1.svg" alt="Angular" class="chip-logo">
+                    Angular (Frontend)
+                </mat-chip-option>
             </mat-chip-listbox>
         </mat-card-content>
     </mat-card>
 
-    <mat-card class="info-card">
+    <mat-card class="info-card card-arquitectura">
         <mat-card-header>
             <mat-card-title>
                 <mat-icon>account_tree</mat-icon>
                 Arquitectura del Proyecto
             </mat-card-title>
-            <mat-card-subtitle>Estructura de carpetas (README.md)</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
-            <pre class="architecture-pre">
-tpi-blockchain\
-|-- api\
-|   |-- src\
-|   |   |-- server.ts
-|-- front\
-|   |-- src\
-|   | |-- app\
-|-- smart-contract\
-|   |-- src\
-|   |   |-- index.ts
-|   |   |-- medicamento.ts
-|-- smart-contract-go\
-|   |-- pharma_ledger.go
-...
-            </pre>
+            <img mat-card-image src="arquitectura.png" alt="Diagrama de Transición de Estados" class="dte-image">
         </mat-card-content>
     </mat-card>
 
-    <mat-card class="info-card">
+    <mat-card class="info-card card-dte">
         <mat-card-header>
             <mat-card-title>
                 <mat-icon>settings_ethernet</mat-icon>
-                Diagrama de Transición de Estados (DTE)
+                Diagrama de Transición de Estados
             </mat-card-title>
-            <mat-card-subtitle>Define la lógica de negocio y las validaciones.</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
-            <img mat-card-image src="" alt="Diagrama de Transición de Estados" class="dte-image">
-            
+            <img mat-card-image src="https://i.postimg.cc/vH29Ckxc/DTE.png" alt="Diagrama de Transición de Estados" class="dte-image">
+
             <h4>Estados Posibles:</h4>
             <mat-chip-listbox aria-label="Estados DTE" class="dte-chips">
                 <mat-chip-option>CREADO</mat-chip-option>
@@ -97,5 +118,4 @@ tpi-blockchain\
             </mat-chip-listbox>
         </mat-card-content>
     </mat-card>
-
 </div>

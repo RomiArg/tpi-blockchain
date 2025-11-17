@@ -1,5 +1,6 @@
-<!-- Navbar Global: Siempre visible -->
-<mat-toolbar color="primary">
+<mat-toolbar class="gradient-toolbar">
+  <img src="https://www.frcon.utn.edu.ar/img/logo-utn.png" alt="UTN Logo" class="utn-logo">
+
   <button mat-icon-button routerLink="/">
     <mat-icon>local_pharmacy</mat-icon>
   </button>
@@ -7,9 +8,8 @@
 
   <span class="spacer" style="flex: 1 1 auto;"></span>
 
-  <button mat-button routerLink="/">HOME</button>
-  <button mat-button routerLink="/medicamentos">LISTADO</button>
+  <button mat-button type="button" class="btn-toolbar" routerLink="/">HOME</button>
+  <button mat-button type="button" class="btn-toolbar" routerLink="/medicamentos">LISTADO</button>
 </mat-toolbar>
 
-<!-- AQUÍ es donde el Router carga Home o Medicamentos dinámicamente -->
 <router-outlet></router-outlet>

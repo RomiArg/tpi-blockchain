@@ -1,26 +1,94 @@
 .home-container {
-    display: flex;
-    flex-wrap: wrap; /* Permitir que las cards se envuelvan */
-    justify-content: center; /* Centrar las cards horizontalmente */
-    gap: 20px; /* Espacio entre cards */
+    display: grid;
+    grid-template-columns: 1fr 1.5fr 1fr;
+    grid-auto-rows: auto;
+    gap: 20px;
+    padding: 20px;
+    min-height: 80vh;
+    align-items: flex-start;
+}
+
+.main-card .mat-card-title,
+.info-card .mat-card-title {
+    color: #3f51b5;
+}
+
+.main-card h3 {
+    margin-top: 10px;
+    margin-bottom: 4px;
+}
+
+.home-container {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr 1fr;
+    grid-auto-rows: auto;
+    gap: 20px;
     padding: 20px;
     background-color: #f0f2f5;
     min-height: 80vh;
-    align-items: flex-start; /* Alinear arriba */
+    align-items: flex-start;
 }
 
-.info-card { /* Renombrado de .welcome-card */
-    max-width: 450px; /* Ancho ajustado para varias cards */
+.info-card {
     width: 100%;
-    margin-top: 20px;
     display: flex;
-    flex-direction: column; /* Asegurar que el contenido fluya verticalmente */
+    flex-direction: column;
+}
+
+.main-card {
+    grid-area: 1 / 2 / 3 / 3;
+    z-index: 10;
+}
+
+.card-tecnologia {
+    grid-area: 1 / 1 / 2 / 2;
+}
+
+.card-dte {
+    /* grid-area: 2 / 1 / 3 / 2; */
+    grid-area: 1 / 3 / 2 / 4;
+}
+
+.card-arquitectura {
+    /* grid-area: 1 / 3 / 2 / 4; */
+    grid-area: 2 / 1 / 3 / 2;
+}
+
+.card-objetivo {
+    grid-area: 2 / 2 / 3 / 3;
+}
+
+.main-card {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.main-card h3 {
+    color: #3f51b5; /* Color primario de Angular Material */
+    margin-top: 10px;
+    margin-bottom: 4px;
+}
+.main-card p {
+    font-size: 1.05em;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+.main-card .mat-card-title {
+    font-size: 1.3em;
+}
+
+.chip-logo {
+    height: 20px;
+    width: auto;
+    max-width: 120px;
+    margin-right: 8px;
+    vertical-align: middle;
 }
 
 .mat-card-header .mat-card-title {
     display: flex;
     align-items: center;
-    gap: 8px; /* Espacio entre el ícono y el título */
+    gap: 8px;
 }
 
 .hero-image {
@@ -30,7 +98,7 @@
     background: white;
 }
 
-.dte-image { /* Nuevo estilo para la imagen DTE */
+.dte-image {
     width: 100%;
     object-fit: contain;
     background: white;
@@ -40,14 +108,14 @@
     border-radius: 4px;
 }
 
-.architecture-pre { /* Nuevo estilo para el bloque de arquitectura */
+.architecture-pre {
     background-color: #2e2e2e;
     color: #f0f0f0;
     padding: 15px;
     border-radius: 5px;
     font-family: 'Courier New', Courier, monospace;
     font-size: 0.9em;
-    overflow-x: auto; /* Scroll horizontal si es necesario */
+    overflow-x: auto;
 }
 
 .dte-chips {
@@ -68,7 +136,7 @@ ul {
 li {
     margin-bottom: 5px;
     color: #555;
-    display: flex; /* Para alinear íconos */
+    display: flex;
     align-items: center;
-    gap: 8px; /* Espacio entre ícono y texto */
+    gap: 8px;
 }
