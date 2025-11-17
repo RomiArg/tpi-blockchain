@@ -8,7 +8,7 @@ El proyecto cuenta con 4 carpetas:
 - **front:** tiene la vista básica para la comunicación efectiva con la **api** y el **smart-contract**.
 
 Tiene la siguiente estructura:
-```text
+```plaintext
 tpi-blockchain\
 |-- api\
 |   |-- src\
@@ -48,13 +48,13 @@ Estos pasos son obligatorios para un entorno de desarrollo en Windows y solucion
 
 Para todos los pasos que involucren docker o los scripts de network.sh, deberás usar Git Bash o PowerShell ejecutado "Como Administrador".
 
-### 2. Configurar Docker Desktop
+### 2. (Windows) Configurar Docker Desktop
 
 El chaincode necesita "hablar" con el motor de Docker para construirse.
 
-1. Abre Docker Desktop.  
-2. Ve a Settings (⚙️) > General.  
-3. Marca la casilla: **"Expose daemon on tcp://localhost:2375 without TLS"**.  
+1. Abre Docker Desktop.
+2. Ve a Settings (⚙️) > General.
+3. Marca la casilla: **"Expose daemon on tcp://localhost:2375 without TLS"**.
 4. Presiona **"Apply & Restart"**.
 
 ### 3. (Windows) Arreglar Permisos de Docker
@@ -71,11 +71,12 @@ Ejemplo de cómo debe quedar:
 volumes:
   - ./docker/peercfg:/etc/hyperledger/peercfg
   # La siguiente línea se comenta para evitar el error de permisos en Windows/Git Bash
-  # - ${DOCKER_SOCK}:/host/var/run/docker.sock 
+  # - ${DOCKER_SOCK}:/host/var/run/docker.sock
 ```
 
 Importante: En ese mismo archivo, bajo el servicio `peer0.org2.example.com`, asegúrate de que el `CORE_VM_ENDPOINT` sea `tcp://host.docker.internal:2375` (igual que el de `peer0.org1`).
 
+Este paso solo es necesario para usuarios de Windows
 
 ## Pasos para levantar el proyecto
 
@@ -95,7 +96,7 @@ Instala las dependencias:
 npm install
 ```
 
-Crea el archivo `.env`. En Windows puedes usar:
+Crea el archivo `.env`. En Windows/Linux puedes usar:
 
 ```bash
 copy .env.example .env
@@ -109,13 +110,11 @@ Ejemplo para Windows:
 CRYPTO_PATH_ORG1=C:\Users\stefa\Downloads\TPI\tpi-blockchain\fabric-samples\test-network\organizations\peerOrganizations\org1.example.com
 ```
 
-(El resto de variables como `CHANNEL_NAME` y `CHAINCODE_NAME` ya son correctas).
-
-### Paso 2: Levantar la Red Fabric y Desplegar (Terminal 2 - como Administrador)
+### Paso 2: Levantar la Red Fabric y Desplegar (Terminal 2)
 
 Ahora sí, levantamos la red con todos nuestros arreglos.
 
-Abre una nueva terminal (Git Bash o PowerShell) como Administrador.
+Abre una nueva terminal (Git Bash o PowerShell) como Administrador en Windows.
 
 Ve al directorio de la `test-network`:
 
@@ -124,6 +123,15 @@ cd tpi-blockchain/fabric-samples/test-network
 ```
 
 Limpia ejecuciones anteriores (si las hay):
+En algunos casos en Linux usar los siguientes comandos
+```bash
+docker stop $(docker ps -aq) 2>/dev/null || true
+docker rm $(docker ps -aq) 2>/dev/null || true
+docker system prune -f
+docker volume prune -f
+
+docker ps # Para ver que no haya procesos activos
+```
 
 ```bash
 ./network.sh down
@@ -135,6 +143,17 @@ Levanta la red (con CouchDB para poder ver los datos):
 ./network.sh up createChannel -s couchdb
 ```
 
+En algunos casos de Linux es necesario modificar el archivo ``network.config``
+```yaml
+# default database (-s)
+DATABASE="couchdb"
+```
+Ahora usar este comando para Linux
+
+```bash
+./network.sh up createChannel -ca
+```
+
 Despliega TU chaincode luego del -ccn (`pharma-ledger`). Este comando usa:
 
 - La ruta relativa correcta luego del -ccp (`../../smart-contract`).
@@ -144,11 +163,43 @@ Despliega TU chaincode luego del -ccn (`pharma-ledger`). Este comando usa:
 ./network.sh deployCC -ccn pharma-ledger -ccp ../../smart-contract -ccl typescript -ccep "OR('Org1MSP.peer','Org2MSP.peer')" -cci InitLedger
 ```
 
-Espera a que termine. Deberías ver:
-
-```text
-========== Chaincode successfully deployed ==========
+#### Probar la conexion
+##### Setear Variables de Entorno
+En Linux es importante setear las variables de entorno para que funcione el comando ``peer``
+Se puede usar este comando
+```bash
+source scripts/envVar.sh && setGlobals 1
 ```
+O estos en el caso que no funcione el anterior
+```bash
+export PATH=${PWD}/../bin:$PATH
+export FABRIC_CFG_PATH=$PWD/../config/
+export CORE_PEER_TLS_ENABLED=true
+export CORE_PEER_LOCALMSPID="Org1MSP"
+export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+export CORE_PEER_ADDRESS=localhost:7051
+```
+
+###### Probar
+
+```bash
+peer chaincode query -C mychannel -n pharma-ledger -c '{"Args":["ConsultarTodosLosMedicamentos"]}'
+```
+
+```bash
+peer chaincode invoke \
+  -o localhost:7050 \
+  --ordererTLSHostnameOverride orderer.example.com \
+  --tls \
+  --cafile $PWD/organizations/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem \
+  -C mychannel \
+  -n pharma-ledger \
+  --peerAddresses localhost:7051 \
+  --tlsRootCertFiles $PWD/organizations/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem \
+  --peerAddresses localhost:9051 \
+  --tlsRootCertFiles $PWD/organizations/peerOrganizations/org2.example.com/tlsca/tlsca.org2.example.com-cert.pem \
+  -c '{"Args":["CrearMedicamento","MED-3001","TestMed","LOTE-123","2024-01-01","2025-01-01"]}'
 
 ### Paso 3: Iniciar la API (Terminal 1)
 
@@ -172,6 +223,22 @@ Datos iniciales no encontrados. Ejecutando InitLedger...
 
 ¡Si ves esto, la API está conectada y funcionando!
 
+#### Probar endpoint desde la consola
+```bash
+curl http://localhost:3000/api/medicamentos
+```
+
+```bash
+curl -X POST http://localhost:3000/api/medicamentos \
+  -H "Content-Type: application/json" \
+  -d '{
+    "assetID": "MED-3002",
+    "nombreComercial": "ParacetamolTest",
+    "lote": "LOTE-555",
+    "fechaFabricacion": "2024-02-01",
+    "fechaVencimiento": "2026-02-01"
+  }'
+```
 ### Paso 4: Levantar el Frontend (Terminal 3)
 
 Abre una tercera terminal.
@@ -187,13 +254,6 @@ Instala las dependencias:
 ```bash
 npm install
 ```
-
-Instalar Angular
-
-```bash
-npm install -g @angular/cli
-```
-
 
 Inicia el servidor de desarrollo de Angular:
 
