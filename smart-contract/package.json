@@ -5,7 +5,7 @@
     "main": "dist/index.js",
     "typings": "dist/index.d.ts",
     "engines": {
-        "node": ">=24"
+        "node": ">=18"
     },
     "dependencies": {
         "fabric-contract-api": "^2.5.5",

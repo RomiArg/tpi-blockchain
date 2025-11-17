@@ -4,48 +4,44 @@ import * as dotenv from 'dotenv';
 import path from 'path';
 import express, { Request, Response } from 'express';
 import cors from 'cors';
-import { connect, Contract, Identity, Signer } from '@hyperledger/fabric-gateway';
+import { connect, Contract, Identity, Signer, signers } from '@hyperledger/fabric-gateway';
 import { Client as GrpcClient, credentials as grpcCredentials } from '@grpc/grpc-js';
 import crypto from 'crypto';
 import { promises as fs } from 'fs';
 
 dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 
-// --- Configuración de la API ---
+
 const app = express();
 app.use(cors());
 app.use(express.json());
 const port = 3000;
 
-// --- Configuración de Fabric ---
+
 const channelName = process.env.CHANNEL_NAME || 'mychannel';
 const chaincodeName = process.env.CHAINCODE_NAME || 'pharma-ledger';
 const mspId = process.env.MSP_ID || 'Org1MSP';
 const peerEndpoint = process.env.PEER_ENDPOINT || 'localhost:7051';
 const peerHostAlias = process.env.PEER_HOST_ALIAS || 'peer0.org1.example.com';
 
-// --- Rutas ---
 const cryptoPathOrg1 = process.env.CRYPTO_PATH_ORG1;
 if (!cryptoPathOrg1) {
     console.error('Error: La variable CRYPTO_PATH_ORG1 no está definida en .env');
     process.exit(1);
 }
 
-// Construimos las rutas absolutas
 const projectRoot = path.resolve(__dirname, '..', '..');
 const cryptoPath = path.resolve(projectRoot, cryptoPathOrg1);
 
 const keyDirectoryPath = path.resolve(cryptoPath, 'users', 'User1@org1.example.com', 'msp', 'keystore');
 const certDirectoryPath = path.resolve(cryptoPath, 'users', 'User1@org1.example.com', 'msp', 'signcerts');
-// const certPath = path.resolve(cryptoPath, 'users', 'User1@org1.example.com', 'msp', 'signcerts', 'cert.pem');
 const tlsCertPath = path.resolve(cryptoPath, 'peers', 'peer0.org1.example.com', 'tls', 'ca.crt');
 
-// const keyDirectoryPath = path.resolve(cryptoPath, 'users', 'Admin@org1.example.com', 'msp', 'keystore');
-// const certPath = path.resolve(cryptoPath, 'users', 'Admin@org1.example.com', 'msp', 'signcerts', 'cert.pem');
-// const tlsCertPath = path.resolve(cryptoPath, 'peers', 'peer0.org1.example.com', 'tls', 'ca.crt');
-
-
 let contract: Contract;
+
+console.log('*************************************************');
+console.log('DEBUG: Usando esta identidad:', certDirectoryPath);
+console.log('*************************************************');
 
 interface CrearMedicamentoBody {
     assetID: string;
@@ -64,13 +60,30 @@ async function initializeFabric(): Promise<void> {
         const gateway = connect({
             client,
             identity: await newIdentity(),
-            signer: await newSigner(),
+            signer: await newSigner(), 
         });
 
         const network = gateway.getNetwork(channelName);
+        
         contract = network.getContract(chaincodeName);
 
         console.log('✅ Conexión con Fabric establecida y contrato "pharma-ledger" listo.');
+
+        try {
+            console.log('Verificando datos iniciales (seeding)...');
+            await contract.evaluateTransaction('ConsultarActivo', 'MED-1001');
+            console.log('✅ Datos iniciales ya existen.');
+
+        } catch (error: any) {
+            if (error.message.includes('no existe')) {
+                console.log('Datos iniciales no encontrados. Ejecutando InitLedger...');
+                await contract.submitTransaction('InitLedger');
+                console.log('✅ Datos iniciales creados (InitLedger).');
+            } else {
+
+                console.error('Error al verificar datos iniciales:', error.message);
+            }
+        }
 
     } catch (error) {
         console.error('******** FALLÓ LA INICIALIZACIÓN DE FABRIC:');
@@ -79,60 +92,7 @@ async function initializeFabric(): Promise<void> {
     }
 }
 
-/* async function initializeFabric(): Promise<void> {
-    try {
-        console.log('Inicializando conexión con Fabric...');
-        console.log('Inicializando conexión con Fabric...');
-        console.log(`Usando Crypto Path: ${cryptoPath}`);
-
-        const client = await newGrpcClient();
-        const gateway = connect({
-            client,
-            identity: await newIdentity(),
-            signer: await newSigner(),
-        });
-
-        const network = gateway.getNetwork(channelName);
-        contract = network.getContract(chaincodeName);
-
-        console.log('✅ Conexión con Fabric establecida y contrato "pharma-ledger" listo.');
-
-        // --- INICIO: LÓGICA DE SEEDING (IDEMPOTENTE) ---
-        try {
-            // 1. Intenta consultar un activo "semilla"
-            console.log('Verificando datos iniciales (seeding)...');
-            await contract.evaluateTransaction('ConsultarActivo', 'MED-SEED-001');
-            console.log('✅ Datos iniciales ya existen.');
-
-        } catch (error: any) {
-            // 2. Si falla (porque no existe), lo crea.
-            if (error.message.includes('no existe')) {
-                console.log('Datos iniciales no encontrados. Creando...');
-                await contract.submitTransaction(
-                    'CrearMedicamento',
-                    'MED-SEED-001',
-                    'Medicamento Semilla',
-                    'LOTE-SEED',
-                    new Date().toISOString(),
-                    new Date(Date.now() + 365*24*60*60*1000).toISOString() // Vence en 1 año
-                );
-                console.log('✅ Datos iniciales creados (MED-SEED-001).');
-            } else {
-                // Si es un error diferente (ej. sin permisos), muéstralo
-                console.error('Error al verificar datos iniciales:', error.message);
-            }
-        }
-        // --- FIN: LÓGICA DE SEEDING ---
-
-    } catch (error) {
-        console.error('******** FALLÓ LA INICIALIZACIÓN DE FABRIC:');
-        console.error(error);
-        process.exit(1);
-    }
-} */
-
 // --- Endpoints de la API ---
-// GET /api/medicamentos
 app.get('/api/medicamentos', async (req: Request, res: Response) => {
     try {
         console.log('Recibida petición GET /api/medicamentos (todos)');
@@ -145,7 +105,6 @@ app.get('/api/medicamentos', async (req: Request, res: Response) => {
     }
 });
 
-// GET /api/medicamentos/:id
 app.get('/api/medicamentos/:id', async (req: Request, res: Response) => {
     try {
         const assetID = req.params.id;
@@ -159,7 +118,6 @@ app.get('/api/medicamentos/:id', async (req: Request, res: Response) => {
     }
 });
 
-// GET /api/medicamentos/:id/historial
 app.get('/api/medicamentos/:id/historial', async (req: Request, res: Response) => {
     try {
         const assetID = req.params.id;
@@ -173,7 +131,6 @@ app.get('/api/medicamentos/:id/historial', async (req: Request, res: Response) =
     }
 });
 
-// POST /api/medicamentos
 app.post('/api/medicamentos', async (req: Request, res: Response) => {
     try {
         const {
@@ -211,8 +168,6 @@ app.listen(port, async () => {
     console.log(`🚀 Servidor API de PharmaLedger (TS) escuchando en http://localhost:${port}`);
 });
 
-// --- Funciones Helper de Conexión ---
-
 async function newGrpcClient(): Promise<GrpcClient> {
     const tlsRootCert = await fs.readFile(tlsCertPath);
     const tlsCredentials = grpcCredentials.createSsl(tlsRootCert);
@@ -229,18 +184,11 @@ async function newIdentity(): Promise<Identity> {
     return { mspId, credentials };
 }
 
-// La función 'Signer' (firmante) debe ser una función que toma un 'digest' (hash)
-// y devuelve una 'signature' (firma).
 async function newSigner(): Promise<Signer> {
     const files = await fs.readdir(keyDirectoryPath);
     const keyPath = path.resolve(keyDirectoryPath, files[0]);
     const privateKeyPem = await fs.readFile(keyPath);
     const privateKey = crypto.createPrivateKey(privateKeyPem);
 
-    return async (digest: Uint8Array): Promise<Uint8Array> => {
-        const sign = crypto.createSign('SHA256');
-        sign.update(digest);
-        const signature = sign.sign(privateKey);
-        return signature;
-    };
+    return signers.newPrivateKeySigner(privateKey);
 }
