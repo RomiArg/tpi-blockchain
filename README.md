@@ -106,12 +106,20 @@ Crea el archivo `.env`. En Windows/Linux puedes usar:
 copy .env.example .env
 ```
 
-¡CRÍTICO! Edita el archivo `.env` y define la variable `CRYPTO_PATH_ORG1`. Debe ser la ruta absoluta a la carpeta de organizaciones en tu máquina.
+¡CRÍTICO! Edita el archivo .env. Este archivo ahora define las rutas a todas las 4 identidades (roles) que usa la aplicación.
 
-Ejemplo para Windows:
+Debes definir la ruta base absoluta a tu carpeta fabric-samples.
+
+Instrucción: Busca todas las variables que terminan en _PATH (como ROLE_LABORATORIO_CERT_PATH, ROLE_LABORATORIO_KEY_PATH, etc.) y reemplaza la parte inicial de la ruta por la ruta absoluta correcta y que los nombres de los archivos y directorios .cert dentro de organizations en faabric samples coincidan.
+
+Ejemplo (usando la ruta de wsl /mnt):
 
 ```bash
-CRYPTO_PATH_ORG1=C:\Users\stefa\Downloads\TPI\tpi-blockchain\fabric-samples\test-network\organizations\peerOrganizations\org1.example.com
+ROLE_LABORATORIO_CERT_PATH=/mnt/c/tpDTB/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts/Admin@org1.example.com-cert.pem
+ROLE_LABORATORIO_KEY_PATH=/mnt/c/tpDTB/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/
+ROLE_LABORATORIO_TLS_PATH=/mnt/c/tpDTB/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+
+y asi para todos los roles...
 ```
 
 ### Paso 2: Levantar la Red Fabric y Desplegar (Terminal 2)
