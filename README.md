@@ -76,23 +76,6 @@ volumes:
 
 Importante: En ese mismo archivo, bajo el servicio `peer0.org2.example.com`, asegúrate de que el `CORE_VM_ENDPOINT` sea `tcp://host.docker.internal:2375` (igual que el de `peer0.org1`).
 
-### 4. Arreglar Versión de Node.js del Chaincode
-
-Esto soluciona el error `access denied` o `10 ABORTED` causado por un "crash" silencioso del chaincode.
-
-- Abre el archivo: `smart-contract/package.json`.
-- Busca la sección `"engines"`.
-- Cámbiala para que sea compatible con Node 18 (que es el que usa Fabric):
-
-DE:
-```json
-"node": ">=24"
-```
-
-A:
-```json
-"node": ">=18"
-```
 
 ## Pasos para levantar el proyecto
 

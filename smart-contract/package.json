@@ -21,5 +21,8 @@
     "scripts": {
         "build": "tsc",
         "start": "fabric-chaincode-node start"
-    }
+    },
+    "files": [
+        "dist"
+    ]
 }
