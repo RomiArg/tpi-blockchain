@@ -7,7 +7,8 @@ export interface Medicamento {
     fechaFabricacion: string;
     fechaVencimiento: string;
     estadoActual: Estado;
-    propietarioActual: string;
+    propietarioActualID: string; // <-- (MODIFICADO) Ej: "Admin@org1.example.com"
+    propietarioActualMSPID: string; // <-- (NUEVO) Ej: "Org1MSP"
     historialDeCustodia: any[];
     docType?: string;
 }

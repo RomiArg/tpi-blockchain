@@ -6,7 +6,7 @@ import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { PharmaLedger } from '../../servicios/pharma-ledger';
+import { PharmaLedgerService } from '../../servicios/pharma-ledger';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { finalize } from 'rxjs';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -33,7 +33,7 @@ export class CrearMedicamento {
 
   constructor(
     private fb: FormBuilder,
-    private pharmaService: PharmaLedger,
+    private pharmaService: PharmaLedgerService,
     private snackBar: MatSnackBar,
     public dialogRef: MatDialogRef<CrearMedicamento>
   ) {
@@ -58,7 +58,7 @@ export class CrearMedicamento {
         next: (res) => {
           this.snackBar.open(`Medicamento ${res.assetID} creado con éxito`, 'Cerrar', { duration: 3000 });
           // Cierra el diálogo y devuelve el nuevo activo
-          this.dialogRef.close()
+          this.dialogRef.close('creado')
         },
         error: (err) => {
           this.snackBar.open(`Error: ${err.error?.error || err.message}`, 'Cerrar', { duration: 5000 });

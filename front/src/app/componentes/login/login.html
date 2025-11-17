@@ -1,0 +1,24 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="text-center mb-4">
+      <img src="assets/logo-pharma.png" alt="PharmaLedger Logo" style="max-width: 150px;">
+      <h2 class="mt-3">PharmaLedger</h2>
+      <p class="text-muted">Seleccione su rol para ingresar</p>
+    </div>
+
+    <div class="d-grid gap-3">
+      <button class="btn btn-primary btn-lg" (click)="loginAs('Laboratorio')">
+        <i class="fas fa-flask me-2"></i> Entrar como Laboratorio
+      </button>
+      <button class="btn btn-info btn-lg text-white" (click)="loginAs('Logistica')">
+        <i class="fas fa-truck me-2"></i> Entrar como Logística
+      </button>
+      <button class="btn btn-success btn-lg" (click)="loginAs('Salud')">
+        <i class="fas fa-hospital me-2"></i> Entrar como Hospital (Salud)
+      </button>
+      <button class="btn btn-secondary btn-lg" (click)="loginAs('Regulador')">
+        <i class="fas fa-clipboard-check me-2"></i> Entrar como Ente Regulador
+      </button>
+    </div>
+  </div>
+</div>

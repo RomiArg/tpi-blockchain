@@ -10,7 +10,7 @@
         </mat-card-header>
         <mat-card-content>
             <p>
-                [cite_start]Garantizar la trazabilidad y la integridad de un medicamento de alto costo (ej. oncológico o de tratamiento especial) desde su producción en el laboratorio hasta su dispensa a un paciente en un centro de salud. [cite: 351]
+                Garantizar la trazabilidad y la integridad de un medicamento de alto costo (ej. oncológico o de tratamiento especial) desde su producción en el laboratorio hasta su dispensa a un paciente en un centro de salud.
             </p>
 
             <mat-divider></mat-divider>
@@ -34,8 +34,8 @@
         <mat-card-content>
             <h4>Blockchain (Modelado y Contrato)</h4>
             <mat-chip-listbox aria-label="Tecnologías Blockchain">
-                [cite_start]<mat-chip-option color="primary" selected>Hyperledger Fabric (v2.x) [cite: 437]</mat-chip-option>
-                [cite_start]<mat-chip-option color="primary" selected>Go (Golang) [cite: 442]</mat-chip-option>
+                <mat-chip-option color="primary" selected>Hyperledger Fabric (v2.x)</mat-chip-option>
+                <mat-chip-option color="primary" selected>Go (Golang)</mat-chip-option>
                 <mat-chip-option color="accent" selected>TypeScript (Chaincode Wrapper)</mat-chip-option>
             </mat-chip-listbox>
 
@@ -68,6 +68,8 @@ tpi-blockchain\
 |   |-- src\
 |   |   |-- index.ts
 |   |   |-- medicamento.ts
+|-- smart-contract-go\
+|   |-- pharma_ledger.go
 ...
             </pre>
         </mat-card-content>
@@ -79,12 +81,12 @@ tpi-blockchain\
                 <mat-icon>settings_ethernet</mat-icon>
                 Diagrama de Transición de Estados (DTE)
             </mat-card-title>
-            [cite_start]<mat-card-subtitle>Define la lógica de negocio y las validaciones. [cite: 403]</mat-card-subtitle>
+            <mat-card-subtitle>Define la lógica de negocio y las validaciones.</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
             <img mat-card-image src="" alt="Diagrama de Transición de Estados" class="dte-image">
             
-            [cite_start]<h4>Estados Posibles: [cite: 394-401]</h4>
+            <h4>Estados Posibles:</h4>
             <mat-chip-listbox aria-label="Estados DTE" class="dte-chips">
                 <mat-chip-option>CREADO</mat-chip-option>
                 <mat-chip-option>EN_TRANSITO_LAB_A_LOGISTICA</mat-chip-option>

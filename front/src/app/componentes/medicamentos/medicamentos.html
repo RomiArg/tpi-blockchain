@@ -1,87 +1,91 @@
-<mat-card color="primary">
-    <mat-card-header>
-        <mat-card-title>
-            <mat-icon>local_pharmacy</mat-icon>
-            Medicamentos
-        </mat-card-title>
-        <span class="toolbar-spacer"></span>
-        <button mat-stroked-button (click)="onConsultarTodos()" [disabled]="cargando">
-            <mat-icon>refresh</mat-icon>
-            Recargar Lista
-        </button>
-        <button mat-raised-button color="accent" (click)="openCreateDialog()" style="margin-left: 15px;">
-            <mat-icon>add</mat-icon>
-            Crear Medicamento
-        </button>
-    </mat-card-header>
-</mat-card>
+<div class="container mt-4">
 
-<div class="content">
-    @if (cargando) {
-        <div class="loading-container">
-            <mat-spinner></mat-spinner>
-            <p>Cargando inventario de medicamentos...</p>
-        </div>
-    }
-
-    <div class="table-container" [hidden]="cargando">
-        <table mat-table [dataSource]="medicamentos" matSort>
-            
-            <ng-container matColumnDef="assetID">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header> Asset ID </th>
-                <td mat-cell *matCellDef="let med"> {{ med.assetID }} </td>
-            </ng-container>
-
-            <ng-container matColumnDef="nombreComercial">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header> Nombre </th>
-                <td mat-cell *matCellDef="let med"> {{ med.nombreComercial }} </td>
-            </ng-container>
-
-            <ng-container matColumnDef="lote">
-                <th mat-header-cell *matHeaderCellDef> Lote </th>
-                <td mat-cell *matCellDef="let med"> {{ med.lote }} </td>
-            </ng-container>
-
-            <ng-container matColumnDef="estadoActual">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header> Estado </th>
-                <td mat-cell *matCellDef="let med"> {{ estadoMap[med.estadoActual] || 'Desconocido' }} </td>
-            </ng-container>
-
-            <ng-container matColumnDef="propietarioActual">
-                <th mat-header-cell *matHeaderCellDef> Propietario </th>
-                <td mat-cell *matCellDef="let med"> {{ med.propietarioActual }} </td>
-            </ng-container>
-
-            <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef> Acciones </th>
-                <td mat-cell *matCellDef="let med">
-                    
-                    <button mat-icon-button color="primary" (click)="openHistoryDialog(med)" title="Ver Historial">
-                        <mat-icon>history</mat-icon>
-                    </button>
-
-                    <button *ngIf="med.estadoActual === estado.CREADO || med.estadoActual === estado.ALMACENADO_LOGISTICA" 
-                            mat-icon-button color="accent" (click)="onTransferir(med)" title="Transferir Activo">
-                        <mat-icon>local_shipping</mat-icon>
-                    </button>
-
-                    <button *ngIf="med.estadoActual === estado.EN_TRANSITO_LAB_A_LOGISTICA || med.estadoActual === estado.EN_TRANSITO_LOGISTICA_A_SALUD" 
-                            mat-icon-button color="primary" (click)="onRecibir(med)" title="Confirmar Recepción">
-                        <mat-icon>inventory_2</mat-icon>
-                    </button>
-
-                    <button *ngIf="med.estadoActual === estado.RECIBIDO_SALUD" 
-                            mat-icon-button color="warn" (click)="onDespachar(med)" title="Despachar a Paciente">
-                        <mat-icon>person</mat-icon>
-                    </button>
-
-                </td>
-            </ng-container>
-            <tr mat-header-row *matHeaderRowDef="columnas"></tr>
-            <tr mat-row *matRowDef="let row; columns: columnas;"></tr>
-        </table>
-
-        <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons>
-        </mat-paginator>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="fs-4">
+      <span class="badge" [ngClass]="getRoleClass()">
+        <i [class]="getRoleIcon()" class="me-2"></i>
+        Viendo como: <strong>{{ currentRole | titlecase }}</strong>
+      </span>
     </div>
+    
+    <div>
+      <button *ngIf="isLaboratorio" class="btn btn-primary me-2" (click)="irACrear()">
+        <i class="fas fa-plus me-1"></i> Crear Medicamento
+      </button>
+
+      <button class="btn btn-secondary" (click)="onLogout()">
+        <i class="fas fa-sign-out-alt me-1"></i> Cambiar Rol
+      </button>
+    </div>
+  </div>
+  <mat-spinner *ngIf="cargando" diameter="50" class="mx-auto mt-5"></mat-spinner>
+
+  <div *ngIf="!cargando" class="mat-elevation-z8">
+    <table mat-table [dataSource]="dataSource" class="w-100">
+
+      <ng-container matColumnDef="assetID">
+        <th mat-header-cell *matHeaderCellDef> ID </th>
+        <td mat-cell *matCellDef="let med"> {{med.assetID}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="nombreComercial">
+        <th mat-header-cell *matHeaderCellDef> Nombre </th>
+        <td mat-cell *matCellDef="let med"> {{med.nombreComercial}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="lote">
+        <th mat-header-cell *matHeaderCellDef> Lote </th>
+        <td mat-cell *matCellDef="let med"> {{med.lote}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="estadoActual">
+        <th mat-header-cell *matHeaderCellDef> Estado </th>
+        <td mat-cell *matCellDef="let med">
+          <span class="badge" [ngClass]="getEstadoClass(med.estadoActual)">
+            {{ estadoNombre(med.estadoActual) }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="propietarioActualID">
+        <th mat-header-cell *matHeaderCellDef> Propietario </th>
+        <td mat-cell *matCellDef="let med"> {{getPropietarioNombre(med.propietarioActualID)}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="ubicacionActual">
+        <th mat-header-cell *matHeaderCellDef> Ubicación </th>
+        <td mat-cell *matCellDef="let med"> {{med.ubicacionActual}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef> Acciones </th>
+        <td mat-cell *matCellDef="let med" class="acciones-cell">
+          
+          <button *ngIf="showTransferir(med)" mat-icon-button color="primary"
+                  matTooltip="Transferir Activo" (click)="onTransferir(med)">
+            <mat-icon>send</mat-icon>
+          </button>
+          
+          <button *ngIf="showRecibir(med)" mat-icon-button color="accent"
+                  matTooltip="Confirmar Recepción" (click)="onRecibir(med)">
+            <mat-icon>inventory_2</mat-icon>
+          </button>
+
+          <button *ngIf="showDespachar(med)" mat-icon-button color="warn"
+                  matTooltip="Despachar a Paciente" (click)="onDespachar(med)">
+            <mat-icon>person</mat-icon>
+          </button>
+
+          <button mat-icon-button
+                  matTooltip="Ver Historial" (click)="onVerHistorial(med)">
+            <mat-icon>history</mat-icon>
+          </button>
+
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
 </div>

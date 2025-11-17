@@ -19,5 +19,5 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   styleUrl: './home.css',
 })
 export class Home {
-
+  constructor() {}
 }

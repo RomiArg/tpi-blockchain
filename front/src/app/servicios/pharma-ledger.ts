@@ -1,58 +1,64 @@
+// src/app/services/pharma-ledger.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { Medicamento } from '../interfaces/medicamento';
+import { HistorialMedicamento } from '../interfaces/historial-medicamento';
+import { UserRole } from './auth.service';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
-export class PharmaLedger {
-  // Dejamos la URL base como /api para que use el proxy de Angular
-  private apiUrl = '/api'; 
+export class PharmaLedgerService {
 
-  constructor(private http: HttpClient) {}
+  private apiUrl = 'http://localhost:3000/api';
 
-  consultarTodos(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/medicamentos`);
+  constructor(private http: HttpClient) { }
+
+  getAllMedicamentos(): Observable<Medicamento[]> {
+    return this.http.get<Medicamento[]>(`${this.apiUrl}/medicamentos`);
   }
 
-  consultarActivo(id: string): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/medicamentos/${id}`);
+  getHistorial(id: string): Observable<HistorialMedicamento[]> {
+    return this.http.get<HistorialMedicamento[]>(`${this.apiUrl}/medicamentos/${id}/historial`);
   }
 
-  consultarHistorial(id: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/medicamentos/${id}/historial`);
-  }
-
-  crearMedicamento(data: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/medicamentos`, data);
-  }
-
-  // --- NUEVAS FUNCIONES AÑADIDAS ---
-
-  /**
-   * Llama al endpoint de la API para transferir un medicamento
-   * (Usado por Laboratorio y Logística)
-   */
-  transferir(id: string, nuevoPropietarioMSPID: string): Observable<any> {
-    const body = { nuevoPropietarioMSPID };
-    return this.http.put<any>(`${this.apiUrl}/medicamentos/${id}/transferir`, body);
+  crearMedicamento(medData: any): Observable<any> {
+    // La API de crear no necesita 'actorMSPID' en el body,
+    // ya que el backend usa Org1 por defecto. Esto está bien.
+    return this.http.post(`${this.apiUrl}/medicamentos`, medData);
   }
 
   /**
-   * Llama al endpoint de la API para recibir un medicamento
-   * (Usado por Logística y Salud)
+   * (MODIFICADO) Acepta 3 argumentos y pasa 'actorMSPID' al body
    */
-  recibir(id: string, ubicacion: string): Observable<any> {
-    const body = { ubicacion };
-    return this.http.put<any>(`${this.apiUrl}/medicamentos/${id}/recibir`, body);
+  transferir(id: string, nuevoPropietarioRole: UserRole, actorRole: UserRole): Observable<any> {
+    const body = {
+      nuevoPropietarioRole: nuevoPropietarioRole,
+      actorRole: actorRole
+    };
+    return this.http.put(`${this.apiUrl}/medicamentos/${id}/transferir`, body);
   }
 
   /**
-   * Llama al endpoint de la API para despachar un medicamento a un paciente
-   * (Usado solo por Salud)
+   * (MODIFICADO) Acepta Rol, no MSPID
    */
-  despachar(id: string, idPaciente: string): Observable<any> {
-    const body = { idPaciente };
-    return this.http.post<any>(`${this.apiUrl}/medicamentos/${id}/despachar`, body);
+  recibir(id: string, ubicacion: string, actorRole: UserRole): Observable<any> {
+    const body = {
+      ubicacion: ubicacion,
+      actorRole: actorRole
+    };
+    return this.http.put(`${this.apiUrl}/medicamentos/${id}/recibir`, body);
+  }
+
+  /**
+   * (MODIFICADO) Acepta Rol, no MSPID
+   */
+  despachar(id: string, idPaciente: string, actorRole: UserRole): Observable<any> {
+    const body = {
+      idPaciente: idPaciente,
+      actorRole: actorRole
+    };
+    return this.http.post(`${this.apiUrl}/medicamentos/${id}/despachar`, body);
   }
 }

@@ -1,0 +1,1 @@
+export type UserRole = 'Laboratorio' | 'Logistica' | 'Salud' | 'Regulador' | null;

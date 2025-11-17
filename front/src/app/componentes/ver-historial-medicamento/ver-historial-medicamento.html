@@ -9,8 +9,8 @@
         </mat-card-header>
 
         <mat-card-content>
-            <p><strong>Estado Actual:</strong> {{ estadoMap[data.estadoActual] }}</p>
-            <p><strong>Propietario Actual:</strong> {{ data.propietarioActual }}</p>
+            <p><strong>Estado Actual:</strong> {{ estadoNombre(data.estadoActual) }}</p>
+            <p><strong>Propietario Actual:</strong> {{ getPropietarioNombre(data.propietarioActualID) }}</p>
             <p><strong>Vencimiento:</strong> {{ data.fechaVencimiento | date:'dd/MM/yyyy' }}</p>
         </mat-card-content>
     </mat-card>
@@ -18,26 +18,31 @@
     <h3>Historial de Transacciones</h3>
 
     @if (cargando) {
-        <div class="spinner-container">
-            <mat-spinner [diameter]="40"></mat-spinner>
-        </div>
+    <div class="spinner-container">
+        <mat-spinner [diameter]="40"></mat-spinner>
+    </div>
     }
 
     <mat-list>
         @for (item of (historial | async); track item.txId) {
+        <mat-card>
+            <br>
             <mat-list-item class="history-item">
                 <mat-icon matListItemIcon>check_circle</mat-icon>
                 <div matListItemTitle class="tx-id">TX-ID: <span class="selectable">{{ item.txId }}</span></div>
                 <div matListItemLine>
-                <span><strong>Estado:</strong> {{ estadoMap[item.valor.estadoActual] }}</span>
+                    <span><strong>Estado:</strong> {{ estadoNombre(item.medicamento.estadoActual) }}</span>
                 </div>
                 <div matListItemLine>
-                <span><strong>Propietario:</strong> {{ item.valor.propietarioActual }}</span>
+                    <span><strong>Propietario:</strong> {{ getPropietarioNombre(item.medicamento.propietarioActualID) }}</span>
                 </div>
                 <div matListItemLine>
-                <span><strong>Fecha:</strong> {{ item.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</span>
+                    <span><strong>Fecha:</strong> {{ item.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</span>
                 </div>
             </mat-list-item>
+            <br>
+        </mat-card>
+        <br>
         }
     </mat-list>
 </mat-dialog-content>
