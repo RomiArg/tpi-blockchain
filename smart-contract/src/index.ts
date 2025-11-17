@@ -16,6 +16,7 @@ export class PharmaLedger extends Contract {
 
     private _agregarHistorial(
         ctx: Context,
+        ctx: Context,
         medicamento: Medicamento,
         actorMSPID: string,
         accion: string,
@@ -161,7 +162,7 @@ export class PharmaLedger extends Contract {
         } else if (medicamento.estadoActual === Estado.ALMACENADO_LOGISTICA) {
             medicamento.estadoActual = Estado.EN_TRANSITO_LOGISTICA_A_SALUD;
             medicamento.propietarioActual = nuevoPropietarioMSPID;
-            this._agregarHistorial(ctx, medicamento, actorMSPID, 'TRANSFERIDO_A_SALUD', 'En Tránsito');
+            this._agregarHistorial(medicamento, actorMSPID, 'TRANSFERIDO_A_SALUD', 'En Tránsito');
         } else {
             throw new Error(`Error de estado: no se puede transferir un activo en estado '${Estado[medicamento.estadoActual]}'`);
         }

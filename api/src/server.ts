@@ -43,6 +43,10 @@ console.log('*************************************************');
 console.log('DEBUG: Usando esta identidad:', certDirectoryPath);
 console.log('*************************************************');
 
+console.log('*************************************************');
+console.log('DEBUG: Usando esta identidad:', certDirectoryPath);
+console.log('*************************************************');
+
 interface CrearMedicamentoBody {
     assetID: string;
     nombreComercial: string;
@@ -72,6 +76,7 @@ async function initializeFabric(): Promise<void> {
         try {
             console.log('Verificando datos iniciales (seeding)...');
             await contract.evaluateTransaction('ConsultarActivo', 'MED-1001');
+            await contract.evaluateTransaction('ConsultarActivo', 'MED-1001');
             console.log('✅ Datos iniciales ya existen.');
 
         } catch (error: any) {
@@ -90,6 +95,7 @@ async function initializeFabric(): Promise<void> {
         console.error(error);
         process.exit(1);
     }
+}
 }
 
 // --- Endpoints de la API ---
