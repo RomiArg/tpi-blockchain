@@ -11,7 +11,6 @@ import { promises as fs } from 'fs';
 
 dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 
-
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -43,10 +42,6 @@ console.log('*************************************************');
 console.log('DEBUG: Usando esta identidad:', certDirectoryPath);
 console.log('*************************************************');
 
-console.log('*************************************************');
-console.log('DEBUG: Usando esta identidad:', certDirectoryPath);
-console.log('*************************************************');
-
 interface CrearMedicamentoBody {
     assetID: string;
     nombreComercial: string;
@@ -64,11 +59,11 @@ async function initializeFabric(): Promise<void> {
         const gateway = connect({
             client,
             identity: await newIdentity(),
-            signer: await newSigner(), 
+            signer: await newSigner(),
         });
 
         const network = gateway.getNetwork(channelName);
-        
+
         contract = network.getContract(chaincodeName);
 
         console.log('✅ Conexión con Fabric establecida y contrato "pharma-ledger" listo.');
