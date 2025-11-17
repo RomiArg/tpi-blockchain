@@ -16,7 +16,6 @@ export class PharmaLedger extends Contract {
 
     private _agregarHistorial(
         ctx: Context,
-        ctx: Context,
         medicamento: Medicamento,
         actorMSPID: string,
         accion: string,
@@ -162,7 +161,7 @@ export class PharmaLedger extends Contract {
         } else if (medicamento.estadoActual === Estado.ALMACENADO_LOGISTICA) {
             medicamento.estadoActual = Estado.EN_TRANSITO_LOGISTICA_A_SALUD;
             medicamento.propietarioActual = nuevoPropietarioMSPID;
-            this._agregarHistorial(medicamento, actorMSPID, 'TRANSFERIDO_A_SALUD', 'En Tránsito');
+            this._agregarHistorial(ctx, medicamento, actorMSPID, 'TRANSFERIDO_A_SALUD', 'En Tránsito');
         } else {
             throw new Error(`Error de estado: no se puede transferir un activo en estado '${Estado[medicamento.estadoActual]}'`);
         }
@@ -233,6 +232,7 @@ export class PharmaLedger extends Contract {
         let result = await iterator.next();
         while (!result.done) {
             if (result.value) {
+                console.log('Historial raw:', result.value);
                 const txValue = result.value.value.toString();
                 let valor: any;
                 try {
@@ -241,9 +241,15 @@ export class PharmaLedger extends Contract {
                     valor = txValue;
                 }
 
+                const ts =
+                    result.value.timestamp &&
+                        typeof result.value.timestamp.seconds === 'number'
+                        ? new Date(result.value.timestamp.seconds * 1000).toISOString()
+                        : null;
+
                 const registro = {
                     txId: result.value.txId,
-                    timestamp: new Date(result.value.timestamp.seconds.low * 1000).toISOString(),
+                    timestamp: ts,
                     valor: valor,
                     isDelete: result.value.isDelete,
                 };

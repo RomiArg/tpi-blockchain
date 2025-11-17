@@ -188,6 +188,7 @@ class PharmaLedger extends fabric_contract_api_1.Contract {
         let result = await iterator.next();
         while (!result.done) {
             if (result.value) {
+                console.log('Historial raw:', result.value);
                 const txValue = result.value.value.toString();
                 let valor;
                 try {
@@ -196,9 +197,13 @@ class PharmaLedger extends fabric_contract_api_1.Contract {
                 catch (err) {
                     valor = txValue;
                 }
+                const ts = result.value.timestamp &&
+                    typeof result.value.timestamp.seconds === 'number'
+                    ? new Date(result.value.timestamp.seconds * 1000).toISOString()
+                    : null;
                 const registro = {
                     txId: result.value.txId,
-                    timestamp: new Date(result.value.timestamp.seconds.low * 1000).toISOString(),
+                    timestamp: ts,
                     valor: valor,
                     isDelete: result.value.isDelete,
                 };

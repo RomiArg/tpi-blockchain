@@ -15,6 +15,9 @@
         "@types/node": "^24.8.0",
         "typescript": "^5.9.3"
     },
+    "files": [
+        "dist"
+    ],
     "scripts": {
         "build": "tsc",
         "start": "fabric-chaincode-node start"

@@ -152,13 +152,13 @@ Levanta la red (con CouchDB para poder ver los datos):
 ./network.sh up createChannel -s couchdb
 ```
 
-Despliega TU chaincode (`pharma-ledger`). Este comando usa:
+Despliega TU chaincode luego del -ccn (`pharma-ledger`). Este comando usa:
 
-- La ruta relativa correcta (`../../smart-contract`).
+- La ruta relativa correcta luego del -ccp (`../../smart-contract`).
 - La política de Endorsement OR. Esto es fundamental para que la API (que solo habla con un peer) pueda validar transacciones.
 
 ```bash
-./network.sh deployCC -ccn pharma-ledger -ccp ../../smart-contract -ccl typescript -ccep "OR('Org1MSP.peer','Org2MSP.peer')"
+./network.sh deployCC -ccn pharma-ledger -ccp ../../tpi-blockchain/smart-contract -ccl typescript -ccep "OR('Org1MSP.peer','Org2MSP.peer')" -cci InitLedger
 ```
 
 Espera a que termine. Deberías ver:

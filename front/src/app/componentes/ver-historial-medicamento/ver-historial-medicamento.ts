@@ -10,6 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatListModule } from '@angular/material/list';
 import { MatCardModule } from '@angular/material/card';
 import { AsyncPipe, DatePipe } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-ver-historial-medicamento',
@@ -21,7 +22,8 @@ import { AsyncPipe, DatePipe } from '@angular/common';
     MatListModule,
     MatCardModule,
     DatePipe,
-    AsyncPipe
+    AsyncPipe,
+    MatIconModule
   ],
   templateUrl: './ver-historial-medicamento.html',
   styleUrl: './ver-historial-medicamento.css',
