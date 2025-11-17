@@ -35,16 +35,9 @@ if (!cryptoPathOrg1) {
 const projectRoot = path.resolve(__dirname, '..', '..');
 const cryptoPath = path.resolve(projectRoot, cryptoPathOrg1);
 
-// const keyDirectoryPath = path.resolve(cryptoPath, 'users', 'User1@org1.example.com', 'msp', 'keystore');
-// const certDirectoryPath = path.resolve(cryptoPath, 'users', 'User1@org1.example.com', 'msp', 'signcerts');
-// const certPath = path.resolve(cryptoPath, 'users', 'User1@org1.example.com', 'msp', 'signcerts', 'cert.pem');
-// const tlsCertPath = path.resolve(cryptoPath, 'peers', 'peer0.org1.example.com', 'tls', 'ca.crt');
-
 const keyDirectoryPath = path.resolve(cryptoPath, 'users', 'Admin@org1.example.com', 'msp', 'keystore');
 const certDirectoryPath = path.resolve(cryptoPath, 'users', 'Admin@org1.example.com', 'msp', 'signcerts');
-// const certPath = path.resolve(cryptoPath, 'users', 'Admin@org1.example.com', 'msp', 'signcerts', 'cert.pem');
-const tlsCertPath = path.resolve(cryptoPath, 'peers', 'peer0.org1.example.com', 'tls', 'ca.crt');
-
+const tlsCertPath = path.resolve(cryptoPath, 'tlsca', 'tlsca.org1.example.com-cert.pem');
 
 let contract: Contract;
 
@@ -60,34 +53,9 @@ interface CrearMedicamentoBody {
     fechaVencimiento: string;
 }
 
-/* async function initializeFabric(): Promise<void> {
-    try {
-        console.log('Inicializando conexión con Fabric...');
-        console.log(`Usando Crypto Path: ${cryptoPath}`);
-
-        const client = await newGrpcClient();
-        const gateway = connect({
-            client,
-            identity: await newIdentity(),
-            signer: await newSigner(),
-        });
-
-        const network = gateway.getNetwork(channelName);
-        contract = network.getContract(chaincodeName, 'PharmaLedger');
-
-        console.log('✅ Conexión con Fabric establecida y contrato "pharma-ledger" listo.');
-
-    } catch (error) {
-        console.error('******** FALLÓ LA INICIALIZACIÓN DE FABRIC:');
-        console.error(error);
-        process.exit(1);
-    }
-} */
-
 async function initializeFabric(): Promise<void> {
     try {
         console.log('Inicializando conexión con Fabric...');
-        console.log('Inicializando conexión con Fabric...');
         console.log(`Usando Crypto Path: ${cryptoPath}`);
 
         const client = await newGrpcClient();
@@ -97,16 +65,31 @@ async function initializeFabric(): Promise<void> {
             signer: await newSigner(),
         });
 
+        console.log(`DEBUG: Conectado con MSP ID: [${mspId}]`);
+        console.log(`DEBUG: Usando CryptoPath: [${cryptoPath}]`);
+
         const network = gateway.getNetwork(channelName);
-        contract = network.getContract(chaincodeName, 'PharmaLedger');
+        contract = network.getContract(chaincodeName);
 
         console.log('✅ Conexión con Fabric establecida y contrato "pharma-ledger" listo.');
 
-        // --- INICIO: LÓGICA DE SEEDING (IDEMPOTENTE) ---
         try {
+            console.log('Verificando datos iniciales (seeding)...');
+            const todosBytes = await contract.evaluateTransaction('ConsultarTodosLosMedicamentos');
+            const todos = JSON.parse(Buffer.from(todosBytes).toString());
+            if (Array.isArray(todos) && todos.length > 0) {
+                console.log('✅ Datos iniciales ya existen (hay elementos en el ledger).');
+            } else {
+                console.log('⚠ Ledger vacío. No se ejecutará InitLedger desde la API para evitar inconsistencias. Rellene el ledger usando una transacción determinista o desde consola.');
+            }
+        } catch (error: any) {
+            console.warn('No se pudo verificar seed con ConsultarTodosLosMedicamentos:', error && error.message ? error.message : error);
+            console.log('No se ejecutará InitLedger automáticamente. Use la API para crear activos o ejecute InitLedger manualmente desde un cliente determinista.');
+        }
+        /* try {
             // 1. Intenta consultar un activo "semilla"
             console.log('Verificando datos iniciales (seeding)...');
-            await contract.evaluateTransaction('ConsultarActivo', 'MED-SEED-1001');
+            await contract.evaluateTransaction('ConsultarActivo', 'MED-1001');
             console.log('✅ Datos iniciales ya existen.');
 
         } catch (error: any) {
@@ -114,29 +97,11 @@ async function initializeFabric(): Promise<void> {
                 console.log('Datos iniciales no encontrados. Ejecutando InitLedger...');
                 // Ejecuta InitLedger para poblar la base de datos
                 await contract.submitTransaction('InitLedger');
-                console.log('✅ Datos iniciales creados (InitLedger).');
+                console.log('✅ Datos iniciales creados (InitLedger ejecutado).');
             } else {
                 console.error('Error al verificar datos iniciales:', error.message);
             }
-            /* // 2. Si falla (porque no existe), lo crea.
-            if (error.message.includes('no existe')) {
-                console.log('Datos iniciales no encontrados. Creando...');
-                await contract.submitTransaction(
-                    'CrearMedicamento',
-                    'MED-SEED-001',
-                    'Medicamento Semilla',
-                    'LOTE-SEED',
-                    new Date().toISOString(),
-                    new Date(Date.now() + 365*24*60*60*1000).toISOString() // Vence en 1 año
-                );
-                console.log('✅ Datos iniciales creados (MED-SEED-001).');
-            } else {
-                // Si es un error diferente (ej. sin permisos), muéstralo
-                console.error('Error al verificar datos iniciales:', error.message);
-            } */
-        }
-        // --- FIN: LÓGICA DE SEEDING ---
-
+        } */
     } catch (error) {
         console.error('******** FALLÓ LA INICIALIZACIÓN DE FABRIC:');
         console.error(error);
@@ -244,7 +209,7 @@ async function newIdentity(): Promise<Identity> {
 
 // La función 'Signer' (firmante) debe ser una función que toma un 'digest' (hash)
 // y devuelve una 'signature' (firma).
-async function newSigner(): Promise<Signer> {
+/* async function newSigner(): Promise<Signer> {
     const files = await fs.readdir(keyDirectoryPath);
     const keyPath = path.resolve(keyDirectoryPath, files[0]);
     const privateKeyPem = await fs.readFile(keyPath);
@@ -255,5 +220,17 @@ async function newSigner(): Promise<Signer> {
         sign.update(digest);
         const signature = sign.sign(privateKey);
         return signature;
+    };
+} */
+async function newSigner(): Promise<Signer> {
+    const files = await fs.readdir(keyDirectoryPath);
+    const keyPath = path.resolve(keyDirectoryPath, files[0]);
+    const privateKeyPem = await fs.readFile(keyPath, 'utf8');
+    const privateKey = crypto.createPrivateKey(privateKeyPem);
+
+    return async (digest: Uint8Array): Promise<Uint8Array> => {
+        // digest ya es el hash; usar crypto.sign con null para firmar el digest directamente
+        const signature = crypto.sign(null as any, Buffer.from(digest), privateKey);
+        return Uint8Array.from(signature);
     };
 }
