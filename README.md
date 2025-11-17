@@ -182,11 +182,18 @@ Ve a la raíz de tu proyecto Angular:
 cd tpi-blockchain/front
 ```
 
-Instala las dependencias (si no lo hiciste):
+Instala las dependencias:
 
 ```bash
 npm install
 ```
+
+Instalar Angular
+
+```bash
+npm install -g @angular/cli
+```
+
 
 Inicia el servidor de desarrollo de Angular:
 
