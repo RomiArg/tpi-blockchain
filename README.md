@@ -76,23 +76,6 @@ volumes:
 
 Importante: En ese mismo archivo, bajo el servicio `peer0.org2.example.com`, asegúrate de que el `CORE_VM_ENDPOINT` sea `tcp://host.docker.internal:2375` (igual que el de `peer0.org1`).
 
-### 4. Arreglar Versión de Node.js del Chaincode
-
-Esto soluciona el error `access denied` o `10 ABORTED` causado por un "crash" silencioso del chaincode.
-
-- Abre el archivo: `smart-contract/package.json`.
-- Busca la sección `"engines"`.
-- Cámbiala para que sea compatible con Node 18 (que es el que usa Fabric):
-
-DE:
-```json
-"node": ">=24"
-```
-
-A:
-```json
-"node": ">=18"
-```
 
 ## Pasos para levantar el proyecto
 
@@ -158,7 +141,8 @@ Despliega TU chaincode (`pharma-ledger`). Este comando usa:
 - La política de Endorsement OR. Esto es fundamental para que la API (que solo habla con un peer) pueda validar transacciones.
 
 ```bash
-./network.sh deployCC -ccn pharma-ledger -ccp ../../smart-contract -ccl typescript -ccep "OR('Org1MSP.peer','Org2MSP.peer')"
+./network.sh deployCC -ccn pharma-ledger -ccp ../../smart-contract -ccl typescript -ccep "OR('Org1MSP.peer','Org2MSP.peer')" -cci InitLedger
+
 ```
 
 Espera a que termine. Deberías ver:
