@@ -1,16 +1,26 @@
 .home-container {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 80vh;
+    flex-wrap: wrap; /* Permitir que las cards se envuelvan */
+    justify-content: center; /* Centrar las cards horizontalmente */
+    gap: 20px; /* Espacio entre cards */
     padding: 20px;
     background-color: #f0f2f5;
+    min-height: 80vh;
+    align-items: flex-start; /* Alinear arriba */
 }
 
-.welcome-card {
-    max-width: 600px;
+.info-card { /* Renombrado de .welcome-card */
+    max-width: 450px; /* Ancho ajustado para varias cards */
     width: 100%;
     margin-top: 20px;
+    display: flex;
+    flex-direction: column; /* Asegurar que el contenido fluya verticalmente */
+}
+
+.mat-card-header .mat-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Espacio entre el ícono y el título */
 }
 
 .hero-image {
@@ -18,6 +28,30 @@
     max-height: 200px;
     object-fit: contain;
     background: white;
+}
+
+.dte-image { /* Nuevo estilo para la imagen DTE */
+    width: 100%;
+    object-fit: contain;
+    background: white;
+    padding: 10px;
+    box-sizing: border-box;
+    margin-top: 10px;
+    border-radius: 4px;
+}
+
+.architecture-pre { /* Nuevo estilo para el bloque de arquitectura */
+    background-color: #2e2e2e;
+    color: #f0f0f0;
+    padding: 15px;
+    border-radius: 5px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9em;
+    overflow-x: auto; /* Scroll horizontal si es necesario */
+}
+
+.dte-chips {
+    margin-top: 10px;
 }
 
 .action-btn {
@@ -34,4 +68,7 @@ ul {
 li {
     margin-bottom: 5px;
     color: #555;
+    display: flex; /* Para alinear íconos */
+    align-items: center;
+    gap: 8px; /* Espacio entre ícono y texto */
 }

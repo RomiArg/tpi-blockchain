@@ -1,15 +1,34 @@
-# Ignorar dependencias
-api/node_modules/
-front/node_modules/
-smart-contract/node_modules/
+# --- Node.js / TypeScript ---
+# Ignora las dependencias de todos los proyectos (api, front, smart-contract)
+**/node_modules/
 
-# Ignorar variables de entorno
-api/.env
+# Ignora los archivos compilados de TypeScript/Angular
+**/dist/
+**/build/
+**/tmp/
+**/.angular/
 
-# Ignorar configuraciones de vscode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-.history/*
+# --- Archivos de Entorno ---
+# ¡MUY IMPORTANTE! Nunca subir claves privadas, contraseñas o rutas locales.
+# Esto aplica al .env de la 'api/'
+.env
+.env.*
+!.env.example
+
+# --- Go (Proyecto 'smart-contract-go/') ---
+# Ignora el binario compilado (si se genera localmente)
+smart-contract-go/pharma-ledger
+smart-contract-go/pharma-ledger.exe
+**/vendor/
+
+# --- Sistema Operativo / IDE ---
+# macOS
+.DS_Store
+
+# Visual Studio Code
+.vscode/
+
+# Logs generales
+*.log
+npm-debug.log*
+yarn-error.log
