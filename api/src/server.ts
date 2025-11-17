@@ -33,19 +33,15 @@ if (!cryptoPathOrg1) {
 const projectRoot = path.resolve(__dirname, '..', '..');
 const cryptoPath = path.resolve(projectRoot, cryptoPathOrg1);
 
-const keyDirectoryPath = path.resolve(cryptoPath, 'users', 'User1@org1.example.com', 'msp', 'keystore');
-const certDirectoryPath = path.resolve(cryptoPath, 'users', 'User1@org1.example.com', 'msp', 'signcerts');
+// const keyDirectoryPath = path.resolve(cryptoPath, 'users', 'User1@org1.example.com', 'msp', 'keystore');
+// const certDirectoryPath = path.resolve(cryptoPath, 'users', 'User1@org1.example.com', 'msp', 'signcerts');
+// const tlsCertPath = path.resolve(cryptoPath, 'peers', 'peer0.org1.example.com', 'tls', 'ca.crt');
+
+const keyDirectoryPath = path.resolve(cryptoPath, 'users', 'Admin@org1.example.com', 'msp', 'keystore');
+const certDirectoryPath = path.resolve(cryptoPath, 'users', 'Admin@org1.example.com', 'msp', 'signcerts');
 const tlsCertPath = path.resolve(cryptoPath, 'peers', 'peer0.org1.example.com', 'tls', 'ca.crt');
 
 let contract: Contract;
-
-console.log('*************************************************');
-console.log('DEBUG: Usando esta identidad:', certDirectoryPath);
-console.log('*************************************************');
-
-console.log('*************************************************');
-console.log('DEBUG: Usando esta identidad:', certDirectoryPath);
-console.log('*************************************************');
 
 interface CrearMedicamentoBody {
     assetID: string;
@@ -163,6 +159,97 @@ app.post('/api/medicamentos', async (req: Request, res: Response) => {
         res.status(201).json({ status: 'ok', assetID: assetID });
     } catch (error) {
         console.error(`Error al crear medicamento: ${error}`);
+        res.status(500).json({ error: (error as Error).message });
+    }
+});
+
+// --- Endpoint para TRANSFERIR un activo ---
+// PUT /api/medicamentos/:id/transferir
+interface TransferirMedicamentoBody {
+    nuevoPropietarioMSPID: string;
+}
+
+app.put('/api/medicamentos/:id/transferir', async (req: Request, res: Response) => {
+    try {
+        const assetID = req.params.id;
+        const { nuevoPropietarioMSPID } = req.body as TransferirMedicamentoBody;
+
+        console.log(`Recibida petición PUT /api/medicamentos/${assetID}/transferir`, req.body);
+        if (!nuevoPropietarioMSPID) {
+            return res.status(400).json({ error: 'Falta campo obligatorio: nuevoPropietarioMSPID' });
+        }
+
+        // Llamamos a la función "Transferir" del chaincode
+        await contract.submitTransaction(
+            'Transferir',
+            assetID,
+            nuevoPropietarioMSPID
+        );
+
+        res.status(200).json({ status: 'ok', action: 'transferido', assetID: assetID, nuevoPropietario: nuevoPropietarioMSPID });
+    
+    } catch (error) {
+        console.error(`Error al transferir medicamento: ${error}`);
+        res.status(500).json({ error: (error as Error).message });
+    }
+});
+
+// --- Endpoint para RECIBIR un activo ---
+// (Este es el que te da 404)
+interface RecibirMedicamentoBody {
+    ubicacion: string;
+}
+
+app.put('/api/medicamentos/:id/recibir', async (req: Request, res: Response) => {
+    try {
+        const assetID = req.params.id;
+        const { ubicacion } = req.body as RecibirMedicamentoBody;
+
+        console.log(`Recibida petición PUT /api/medicamentos/${assetID}/recibir`, req.body);
+        if (!ubicacion) {
+            return res.status(400).json({ error: 'Falta campo obligatorio: ubicacion' });
+        }
+
+        await contract.submitTransaction(
+            'Recibir',
+            assetID,
+            ubicacion
+        );
+
+        res.status(200).json({ status: 'ok', action: 'recibido', assetID: assetID, ubicacion: ubicacion });
+    
+    } catch (error) {
+        console.error(`Error al recibir medicamento: ${error}`);
+        res.status(500).json({ error: (error as Error).message });
+    }
+});
+
+// --- Endpoint para DESPACHAR un activo ---
+// (Este es el que sigue en tu DTE)
+interface DespacharMedicamentoBody {
+    idPaciente: string;
+}
+
+app.post('/api/medicamentos/:id/despachar', async (req: Request, res: Response) => {
+    try {
+        const assetID = req.params.id;
+        const { idPaciente } = req.body as DespacharMedicamentoBody;
+
+        console.log(`Recibida petición POST /api/medicamentos/${assetID}/despachar`, req.body);
+        if (!idPaciente) {
+            return res.status(400).json({ error: 'Falta campo obligatorio: idPaciente' });
+        }
+
+        await contract.submitTransaction(
+            'DespacharAPaciente',
+            assetID,
+            idPaciente
+        );
+
+        res.status(200).json({ status: 'ok', action: 'despachado', assetID: assetID, idPaciente: idPaciente });
+    
+    } catch (error) {
+        console.error(`Error al despachar medicamento: ${error}`);
         res.status(500).json({ error: (error as Error).message });
     }
 });

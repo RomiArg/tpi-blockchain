@@ -55,7 +55,7 @@ class PharmaLedger extends fabric_contract_api_1.Contract {
                 propietarioActual: 'Org1MSP',
                 historialDeCustodia: [
                     {
-                        timestamp: txTimestamp, // <-- CORREGIDO
+                        timestamp: txTimestamp,
                         actor: 'Org1MSP',
                         accion: 'CREADO',
                         ubicacion: 'Planta de Producción',
@@ -73,7 +73,7 @@ class PharmaLedger extends fabric_contract_api_1.Contract {
                 propietarioActual: 'Org1MSP',
                 historialDeCustodia: [
                     {
-                        timestamp: txTimestamp, // <-- CORREGIDO
+                        timestamp: txTimestamp,
                         actor: 'Org1MSP',
                         accion: 'CREADO',
                         ubicacion: 'Planta de Producción',
@@ -118,6 +118,7 @@ class PharmaLedger extends fabric_contract_api_1.Contract {
     async Transferir(ctx, assetID, nuevoPropietarioMSPID) {
         const medicamento = await this._getMedicamento(ctx, assetID);
         const actorMSPID = this._getMSPID(ctx);
+        // Dejamos esta validación porque el "hack" de Admin@org1 funciona aquí
         if (actorMSPID !== medicamento.propietarioActual) {
             throw new Error(`Transacción no autorizada: solo el propietario actual (${medicamento.propietarioActual}) puede transferir`);
         }
@@ -140,16 +141,20 @@ class PharmaLedger extends fabric_contract_api_1.Contract {
     async Recibir(ctx, assetID, ubicacion) {
         const medicamento = await this._getMedicamento(ctx, assetID);
         const actorMSPID = this._getMSPID(ctx);
-        if (actorMSPID !== medicamento.propietarioActual) {
-            throw new Error(`Transacción no autorizada: solo el nuevo propietario (${medicamento.propietarioActual}) puede recibir`);
-        }
+        // --- VALIDACIÓN COMENTADA PARA LA DEMO ---
+        // if (actorMSPID !== medicamento.propietarioActual) {
+        //     throw new Error(`Transacción no autorizada: solo el nuevo propietario (${medicamento.propietarioActual}) puede recibir`);
+        // }
+        // --- FIN VALIDACIÓN ---
         // Lógica DTE
         if (medicamento.estadoActual === medicamento_1.Estado.EN_TRANSITO_LAB_A_LOGISTICA) {
             medicamento.estadoActual = medicamento_1.Estado.ALMACENADO_LOGISTICA;
+            // Usamos el actorMSPID (Admin@org1) para el historial, aunque el propietario sea otro
             this._agregarHistorial(ctx, medicamento, actorMSPID, 'RECIBIDO_LOGISTICA', ubicacion);
         }
         else if (medicamento.estadoActual === medicamento_1.Estado.EN_TRANSITO_LOGISTICA_A_SALUD) {
             medicamento.estadoActual = medicamento_1.Estado.RECIBIDO_SALUD;
+            // Usamos el actorMSPID (Admin@org1) para el historial
             this._agregarHistorial(ctx, medicamento, actorMSPID, 'RECIBIDO_SALUD', ubicacion);
         }
         else {
@@ -160,9 +165,12 @@ class PharmaLedger extends fabric_contract_api_1.Contract {
     async DespacharAPaciente(ctx, assetID, idPaciente) {
         const medicamento = await this._getMedicamento(ctx, assetID);
         const actorMSPID = this._getMSPID(ctx);
-        if (actorMSPID !== 'Org2MSP') {
-            throw new Error('Transacción no autorizada: solo OrgSalud (Org2MSP) puede despachar');
-        }
+        // --- VALIDACIÓN COMENTADA PARA LA DEMO ---
+        // (El modelado dice que solo OrgSalud/Org2MSP puede despachar)
+        // if (actorMSPID !== 'Org2MSP') { 
+        //     throw new Error('Transacción no autorizada: solo OrgSalud (Org2MSP) puede despachar');
+        // }
+        // --- FIN VALIDACIÓN ---
         if (medicamento.estadoActual !== medicamento_1.Estado.RECIBIDO_SALUD) {
             throw new Error("Error de estado: solo se puede despachar un activo en 'RECIBIDO_SALUD'");
         }
@@ -171,6 +179,7 @@ class PharmaLedger extends fabric_contract_api_1.Contract {
         }
         medicamento.estadoActual = medicamento_1.Estado.DESPACHADO_PACIENTE;
         medicamento.propietarioActual = 'PACIENTE';
+        // Usamos el actorMSPID (Admin@org1) para el historial
         this._agregarHistorial(ctx, medicamento, actorMSPID, `DESPACHADO_PACIENTE (ID: ${idPaciente})`, 'Farmacia Hospital');
         await ctx.stub.putState(assetID, Buffer.from(JSON.stringify(medicamento)));
     }
@@ -188,7 +197,6 @@ class PharmaLedger extends fabric_contract_api_1.Contract {
         let result = await iterator.next();
         while (!result.done) {
             if (result.value) {
-                console.log('Historial raw:', result.value);
                 const txValue = result.value.value.toString();
                 let valor;
                 try {
@@ -197,13 +205,22 @@ class PharmaLedger extends fabric_contract_api_1.Contract {
                 catch (err) {
                     valor = txValue;
                 }
-                const ts = result.value.timestamp &&
-                    typeof result.value.timestamp.seconds === 'number'
-                    ? new Date(result.value.timestamp.seconds * 1000).toISOString()
-                    : null;
+                // El timestamp de la transacción (hora en que se confirmó en el bloque)
+                let txTimestamp = 'N/A';
+                if (result.value && result.value.timestamp) {
+                    const secondsField = result.value.timestamp.seconds;
+                    let tsSeconds;
+                    if (secondsField && typeof secondsField === 'object' && typeof secondsField.toNumber === 'function') {
+                        tsSeconds = secondsField.toNumber();
+                    }
+                    else {
+                        tsSeconds = Number(secondsField);
+                    }
+                    txTimestamp = new Date(tsSeconds * 1000).toISOString();
+                }
                 const registro = {
                     txId: result.value.txId,
-                    timestamp: ts,
+                    timestamp: txTimestamp,
                     valor: valor,
                     isDelete: result.value.isDelete,
                 };

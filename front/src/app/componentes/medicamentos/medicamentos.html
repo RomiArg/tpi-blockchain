@@ -26,6 +26,7 @@
 
     <div class="table-container" [hidden]="cargando">
         <table mat-table [dataSource]="medicamentos" matSort>
+            
             <ng-container matColumnDef="assetID">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> Asset ID </th>
                 <td mat-cell *matCellDef="let med"> {{ med.assetID }} </td>
@@ -52,14 +53,30 @@
             </ng-container>
 
             <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef> Trazabilidad </th>
+                <th mat-header-cell *matHeaderCellDef> Acciones </th>
                 <td mat-cell *matCellDef="let med">
+                    
                     <button mat-icon-button color="primary" (click)="openHistoryDialog(med)" title="Ver Historial">
                         <mat-icon>history</mat-icon>
                     </button>
+
+                    <button *ngIf="med.estadoActual === estado.CREADO || med.estadoActual === estado.ALMACENADO_LOGISTICA" 
+                            mat-icon-button color="accent" (click)="onTransferir(med)" title="Transferir Activo">
+                        <mat-icon>local_shipping</mat-icon>
+                    </button>
+
+                    <button *ngIf="med.estadoActual === estado.EN_TRANSITO_LAB_A_LOGISTICA || med.estadoActual === estado.EN_TRANSITO_LOGISTICA_A_SALUD" 
+                            mat-icon-button color="primary" (click)="onRecibir(med)" title="Confirmar Recepción">
+                        <mat-icon>inventory_2</mat-icon>
+                    </button>
+
+                    <button *ngIf="med.estadoActual === estado.RECIBIDO_SALUD" 
+                            mat-icon-button color="warn" (click)="onDespachar(med)" title="Despachar a Paciente">
+                        <mat-icon>person</mat-icon>
+                    </button>
+
                 </td>
             </ng-container>
-
             <tr mat-header-row *matHeaderRowDef="columnas"></tr>
             <tr mat-row *matRowDef="let row; columns: columnas;"></tr>
         </table>

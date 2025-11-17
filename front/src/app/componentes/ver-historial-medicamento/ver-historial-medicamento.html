@@ -27,7 +27,7 @@
         @for (item of (historial | async); track item.txId) {
             <mat-list-item class="history-item">
                 <mat-icon matListItemIcon>check_circle</mat-icon>
-                <div matListItemTitle class="tx-id">TX-ID: {{ item.txId.substring(0, 20) }}...</div>
+                <div matListItemTitle class="tx-id">TX-ID: <span class="selectable">{{ item.txId }}</span></div>
                 <div matListItemLine>
                 <span><strong>Estado:</strong> {{ estadoMap[item.valor.estadoActual] }}</span>
                 </div>

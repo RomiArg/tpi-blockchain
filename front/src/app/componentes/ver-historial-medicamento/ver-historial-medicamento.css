@@ -25,3 +25,16 @@
     font-size: 0.9em;
     color: #555;
 }
+
+.selectable {
+  user-select: all;
+  -webkit-user-select: all; 
+  -moz-user-select: all;   
+  -ms-user-select: all;     
+}
+
+.tx-id {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
