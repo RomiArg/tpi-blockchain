@@ -7,25 +7,25 @@ import { LoginComponent } from './componentes/login/login';
 import { Home } from './componentes/home/home';
 import { MedicamentosComponent } from './componentes/medicamentos/medicamentos';
 import { CrearMedicamento } from './componentes/crear-medicamento/crear-medicamento';
-import { AuthGuard } from './auth-guard';
+import { AuthGuard } from './servicios/auth-guard';
 
 export const routes: Routes = [
   // (NUEVO) Ruta de Login, es pública
   { path: 'login', component: LoginComponent },
 
   // (MODIFICADO) Todas las rutas de tu app AHORA están protegidas por el AuthGuard
-  { 
-    path: 'home', 
+  {
+    path: 'home',
     component: Home,
     canActivate: [AuthGuard] // <-- El guardia
   },
-  { 
-    path: 'medicamentos', 
+  {
+    path: 'medicamentos',
     component: MedicamentosComponent,
     canActivate: [AuthGuard] // <-- El guardia
   },
-  { 
-    path: 'crear-medicamento', 
+  {
+    path: 'crear-medicamento',
     component: CrearMedicamento,
     canActivate: [AuthGuard] // <-- El guardia
   },

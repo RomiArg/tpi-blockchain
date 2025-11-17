@@ -1,7 +1,6 @@
-// src/app/auth.guard.ts
 import { Injectable } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
-import { AuthService } from './servicios/auth.service';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -14,14 +13,12 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   canActivate(): boolean {
-    // Si el AuthService dice que el usuario está logueado...
     if (this.authService.isLoggedIn()) {
-      return true; // ...permite el acceso a la ruta.
+      return true;
     }
 
-    // Si no...
     console.warn('AuthGuard: Acceso denegado. Redirigiendo a /login');
-    this.router.navigate(['/login']); // ...redirige al login.
-    return false; // ...y bloquea la ruta actual.
+    this.router.navigate(['/login']);
+    return false;
   }
 }

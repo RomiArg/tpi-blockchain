@@ -1,4 +1,3 @@
-// src/app/components/medicamentos/medicamentos.component.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
@@ -59,7 +58,7 @@ export class MedicamentosComponent implements OnInit, OnDestroy {
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
     private router: Router,
-    public authService: AuthService // <-- (SOLUCIÓN 1: Inyectar AuthService)
+    public authService: AuthService
   ) {}
 
 ngOnInit(): void {
@@ -95,10 +94,10 @@ ngOnInit(): void {
       });
   }
 
-onTransferir(medicamento: Medicamento): void {
+  onTransferir(medicamento: Medicamento): void {
     // (MODIFICADO) Ahora usamos Roles de negocio
     let nuevoPropietarioRole: UserRole = null;
-    
+
     if (medicamento.estadoActual === Estado.CREADO) {
       nuevoPropietarioRole = 'Logistica'; // <-- El rol de destino
     } else if (medicamento.estadoActual === Estado.ALMACENADO_LOGISTICA) {
@@ -112,7 +111,7 @@ onTransferir(medicamento: Medicamento): void {
 
     this.cargando = true;
     // (MODIFICADO) Obtenemos el Rol del actor que firma
-    const actorRole = this.authService.getCurrentRole(); 
+    const actorRole = this.authService.getCurrentRole();
     if (!actorRole) return; // Seguridad
 
     // (MODIFICADO) Llamamos a la nueva función del servicio
@@ -126,7 +125,7 @@ onTransferir(medicamento: Medicamento): void {
 
   onRecibir(medicamento: Medicamento): void {
     let ubicacion = '';
-    
+
     if (medicamento.estadoActual === Estado.EN_TRANSITO_LAB_A_LOGISTICA) {
       ubicacion = 'Centro de Distribución';
     } else if (medicamento.estadoActual === Estado.EN_TRANSITO_LOGISTICA_A_SALUD) {
@@ -179,19 +178,19 @@ onTransferir(medicamento: Medicamento): void {
       data: medicamento // <-- Pasa el objeto completo
     });
   }
-  
-irACrear(): void {
-  const dialogRef = this.dialog.open(CrearMedicamento, {
-    width: '80%',
-  });
 
-  dialogRef.afterClosed().subscribe((resultado) => {
-    // Si el resultado es exitoso (puedes ajustar la condición según tu lógica)
-    if (resultado === 'creado') {
-      this.onConsultarTodos();
-    }
-  });
-}
+  irACrear(): void {
+    const dialogRef = this.dialog.open(CrearMedicamento, {
+      width: '80%',
+    });
+
+    dialogRef.afterClosed().subscribe((resultado) => {
+      // Si el resultado es exitoso (puedes ajustar la condición según tu lógica)
+      if (resultado === 'creado') {
+        this.onConsultarTodos();
+      }
+    });
+  }
 
   onLogout(): void {
     this.authService.logout();
@@ -269,9 +268,9 @@ estadoNombre(estado: string): string {
       default: return 'bg-light text-dark';
     }
   }
-  
+
   getRoleIcon(): string {
-     switch (this.currentRole) {
+    switch (this.currentRole) {
       case 'Laboratorio': return 'fas fa-flask';
       case 'Logistica': return 'fas fa-truck';
       case 'Salud': return 'fas fa-hospital';

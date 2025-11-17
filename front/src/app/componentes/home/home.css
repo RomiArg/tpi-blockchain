@@ -46,12 +46,10 @@
 }
 
 .card-dte {
-    /* grid-area: 2 / 1 / 3 / 2; */
     grid-area: 1 / 3 / 2 / 4;
 }
 
 .card-arquitectura {
-    /* grid-area: 1 / 3 / 2 / 4; */
     grid-area: 2 / 1 / 3 / 2;
 }
 
@@ -65,7 +63,7 @@
     flex-direction: column;
 }
 .main-card h3 {
-    color: #3f51b5; /* Color primario de Angular Material */
+    color: #3f51b5;
     margin-top: 10px;
     margin-bottom: 4px;
 }

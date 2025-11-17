@@ -1,4 +1,3 @@
-// src/app/services/pharma-ledger.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -24,14 +23,9 @@ export class PharmaLedgerService {
   }
 
   crearMedicamento(medData: any): Observable<any> {
-    // La API de crear no necesita 'actorMSPID' en el body,
-    // ya que el backend usa Org1 por defecto. Esto está bien.
     return this.http.post(`${this.apiUrl}/medicamentos`, medData);
   }
 
-  /**
-   * (MODIFICADO) Acepta 3 argumentos y pasa 'actorMSPID' al body
-   */
   transferir(id: string, nuevoPropietarioRole: UserRole, actorRole: UserRole): Observable<any> {
     const body = {
       nuevoPropietarioRole: nuevoPropietarioRole,
@@ -40,9 +34,6 @@ export class PharmaLedgerService {
     return this.http.put(`${this.apiUrl}/medicamentos/${id}/transferir`, body);
   }
 
-  /**
-   * (MODIFICADO) Acepta Rol, no MSPID
-   */
   recibir(id: string, ubicacion: string, actorRole: UserRole): Observable<any> {
     const body = {
       ubicacion: ubicacion,
@@ -51,9 +42,6 @@ export class PharmaLedgerService {
     return this.http.put(`${this.apiUrl}/medicamentos/${id}/recibir`, body);
   }
 
-  /**
-   * (MODIFICADO) Acepta Rol, no MSPID
-   */
   despachar(id: string, idPaciente: string, actorRole: UserRole): Observable<any> {
     const body = {
       idPaciente: idPaciente,

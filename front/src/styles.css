@@ -8,8 +8,8 @@ body {
 }
 
 .gradient-toolbar {
-    background: linear-gradient(90deg, #03a9f4 0%, #673ab7 100%);
-    color: white;
+    background: linear-gradient(90deg, #03a9f4 0%, #673ab7 100%) !important;
+    color: white !important;
 }
 
 .utn-logo {
@@ -18,9 +18,11 @@ body {
 }
 
 .color-consulta {
-    color: #3f51b5;
+    color: white !important;
+    background: #3f51b5 !important;
 }
 
 .color-accion {
-    color: #673ab7;
+    color: white !important;
+    background: #673ab7 !important;
 }
