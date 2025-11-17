@@ -96,7 +96,6 @@ async function initializeFabric(): Promise<void> {
         process.exit(1);
     }
 }
-}
 
 // --- Endpoints de la API ---
 app.get('/api/medicamentos', async (req: Request, res: Response) => {
