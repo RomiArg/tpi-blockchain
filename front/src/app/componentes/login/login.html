@@ -1,24 +1,29 @@
 <div class="login-container">
-  <div class="login-card">
-    <div class="text-center mb-4">
-      <img src="assets/logo-pharma.png" alt="PharmaLedger Logo" style="max-width: 150px;">
-      <h2 class="mt-3">PharmaLedger</h2>
-      <p class="text-muted">Seleccione su rol para ingresar</p>
-    </div>
+  <mat-card class="login-card mat-elevation-z8">
+    <mat-card-header class="login-header">
+      <img mat-card-avatar src="https://hyperledger-fabric.readthedocs.io/en/release-2.5/_images/hyperledger_fabric_logo_color.png" alt="PharmaLedger Logo" class="login-logo">
+      <mat-card-title>PharmaLedger</mat-card-title>
+      <mat-card-subtitle>Seleccione su rol para ingresar</mat-card-subtitle>
+    </mat-card-header>
 
-    <div class="d-grid gap-3">
-      <button class="btn btn-primary btn-lg" (click)="loginAs('Laboratorio')">
-        <i class="fas fa-flask me-2"></i> Entrar como Laboratorio
+    <mat-card-content class="login-content">
+
+      <button mat-raised-button color="primary" class="login-button" (click)="loginAs('Laboratorio')">
+        <mat-icon>science</mat-icon> Entrar como Laboratorio
       </button>
-      <button class="btn btn-info btn-lg text-white" (click)="loginAs('Logistica')">
-        <i class="fas fa-truck me-2"></i> Entrar como Logística
+
+      <button mat-raised-button color="accent" class="login-button" (click)="loginAs('Logistica')">
+        <mat-icon>local_shipping</mat-icon> Entrar como Logística
       </button>
-      <button class="btn btn-success btn-lg" (click)="loginAs('Salud')">
-        <i class="fas fa-hospital me-2"></i> Entrar como Hospital (Salud)
+
+      <button mat-raised-button color="primary" class="login-button" (click)="loginAs('Salud')">
+        <mat-icon>local_hospital</mat-icon> Entrar como Hospital (Salud)
       </button>
-      <button class="btn btn-secondary btn-lg" (click)="loginAs('Regulador')">
-        <i class="fas fa-clipboard-check me-2"></i> Entrar como Ente Regulador
+
+      <button mat-stroked-button class="login-button" (click)="loginAs('Regulador')">
+        <mat-icon>assignment_turned_in</mat-icon> Entrar como Ente Regulador
       </button>
-    </div>
-  </div>
+
+    </mat-card-content>
+  </mat-card>
 </div>

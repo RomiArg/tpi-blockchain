@@ -1,4 +1,4 @@
-<div class="container mt-4">
+<!-- <div class="container mt-4">
 
   <div class="d-flex justify-content-between align-items-center mb-3">
     <div class="fs-4">
@@ -7,7 +7,7 @@
         Viendo como: <strong>{{ currentRole | titlecase }}</strong>
       </span>
     </div>
-    
+
     <div>
       <button *ngIf="isLaboratorio" class="btn btn-primary me-2" (click)="irACrear()">
         <i class="fas fa-plus me-1"></i> Crear Medicamento
@@ -60,12 +60,12 @@
       <ng-container matColumnDef="acciones">
         <th mat-header-cell *matHeaderCellDef> Acciones </th>
         <td mat-cell *matCellDef="let med" class="acciones-cell">
-          
+
           <button *ngIf="showTransferir(med)" mat-icon-button color="primary"
                   matTooltip="Transferir Activo" (click)="onTransferir(med)">
             <mat-icon>send</mat-icon>
           </button>
-          
+
           <button *ngIf="showRecibir(med)" mat-icon-button color="accent"
                   matTooltip="Confirmar Recepción" (click)="onRecibir(med)">
             <mat-icon>inventory_2</mat-icon>
@@ -87,5 +87,100 @@
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
     </table>
+  </div>
+</div> -->
+
+<div class="page-container">
+  <mat-toolbar class="page-toolbar">
+    <span class="role-badge" [ngClass]="getRoleClass()">
+      <mat-icon>{{ getRoleIcon() }}</mat-icon>
+      Viendo como: <strong>{{ currentRole | titlecase }}</strong>
+    </span>
+
+    <span style="flex: 1 1 auto;"></span>
+
+    <button *ngIf="isLaboratorio" mat-raised-button color="accent" class="me-2" (click)="irACrear()">
+      <mat-icon>add</mat-icon>
+      Crear Medicamento
+    </button>
+
+    <button mat-button (click)="onLogout()">
+      <mat-icon>logout</mat-icon>
+      Cambiar Rol
+    </button>
+  </mat-toolbar>
+
+  <div class="content-wrapper">
+    <div *ngIf="cargando" class="spinner-container">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+
+    <div *ngIf="!cargando" class="table-container">
+      <table mat-table [dataSource]="dataSource">
+
+        <ng-container matColumnDef="assetID">
+          <th mat-header-cell *matHeaderCellDef> ID </th>
+          <td mat-cell *matCellDef="let med"> {{med.assetID}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="nombreComercial">
+          <th mat-header-cell *matHeaderCellDef> Nombre </th>
+          <td mat-cell *matCellDef="let med"> {{med.nombreComercial}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="lote">
+          <th mat-header-cell *matHeaderCellDef> Lote </th>
+          <td mat-cell *matCellDef="let med"> {{med.lote}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="estadoActual">
+          <th mat-header-cell *matHeaderCellDef> Estado </th>
+          <td mat-cell *matCellDef="let med">
+            <span class="badge" [ngClass]="getEstadoClass(med.estadoActual)">
+              {{ estadoNombre(med.estadoActual) }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="propietarioActualID">
+          <th mat-header-cell *matHeaderCellDef> Propietario </th>
+          <td mat-cell *matCellDef="let med"> {{getPropietarioNombre(med.propietarioActualID)}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="ubicacionActual">
+          <th mat-header-cell *matHeaderCellDef> Ubicación </th>
+          <td mat-cell *matCellDef="let med"> {{med.ubicacionActual}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef> Acciones </th>
+          <td mat-cell *matCellDef="let med" class="acciones-cell">
+
+            <button *ngIf="showTransferir(med)" mat-icon-button color="accent"
+                matTooltip="Transferir Activo" (click)="onTransferir(med)">
+              <mat-icon>send</mat-icon>
+            </button>
+
+            <button *ngIf="showRecibir(med)" mat-icon-button color="accent" matTooltip="Confirmar Recepción" (click)="onRecibir(med)">
+              <mat-icon>inventory_2</mat-icon>
+            </button>
+
+            <button *ngIf="showDespachar(med)" mat-icon-button color="accent"
+                    matTooltip="Despachar a Paciente" (click)="onDespachar(med)">
+              <mat-icon>person</mat-icon>
+            </button>
+
+            <button mat-icon-button color="primary"
+                    matTooltip="Ver Historial" (click)="onVerHistorial(med)">
+              <mat-icon>history</mat-icon>
+            </button>
+
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </div>
   </div>
 </div>

@@ -1,4 +1,4 @@
-<h1 mat-dialog-title>Crear Nuevo Medicamento</h1>
+<!-- <h1 mat-dialog-title>Crear Nuevo Medicamento</h1>
 
 <div mat-dialog-content [formGroup]="formulario">
     <p>Ingrese los datos del nuevo activo.</p>
@@ -38,4 +38,48 @@
     <button mat-raised-button color="primary" (click)="onCrearMedicamento()" [disabled]="cargando || formulario.invalid">
         {{ cargando ? 'Creando...' : 'Crear' }}
     </button>
-</div>
+</div> -->
+
+<h1 mat-dialog-title class="color-accion">Crear Nuevo Medicamento</h1>
+
+@if (cargando) {
+    <mat-spinner [diameter]="30"></mat-spinner>
+}
+
+<mat-dialog-content [formGroup]="formulario">
+    <p>Ingrese los datos del nuevo activo.</p>
+
+    <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Asset ID</mat-label>
+        <input matInput formControlName="assetID">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Nombre Comercial</mat-label>
+        <input matInput formControlName="nombreComercial">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Lote</mat-label>
+        <input matInput formControlName="lote">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Fecha Fabricación (ISO)</mat-label>
+        <input matInput formControlName="fechaFabricacion" placeholder="ej. 2025-01-01T12:00:00Z">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Fecha Vencimiento (ISO)</mat-label>
+        <input matInput formControlName="fechaVencimiento" placeholder="ej. 2026-01-01T12:00:00Z">
+    </mat-form-field>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()" [disabled]="cargando">Cancelar</button>
+
+    <button mat-raised-button color="primary" (click)="onCrearMedicamento()" [disabled]="cargando || formulario.invalid">
+        {{ cargando ? 'Creando...' : 'Crear' }}
+    </button>
+</mat-dialog-actions>

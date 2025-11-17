@@ -20,6 +20,7 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { CrearMedicamento } from '../crear-medicamento/crear-medicamento';
+import { MatToolbarModule } from '@angular/material/toolbar';
 
 @Component({
   selector: 'app-medicamentos',
@@ -32,9 +33,10 @@ import { CrearMedicamento } from '../crear-medicamento/crear-medicamento';
     MatProgressSpinnerModule,
     MatSortModule,
     MatPaginatorModule,
-    MatDialogModule, 
-    MatSnackBarModule, 
-    MatTooltipModule
+    MatDialogModule,
+    MatSnackBarModule,
+    MatTooltipModule,
+    MatToolbarModule
   ],
   templateUrl: './medicamentos.html',
   styleUrls: ['./medicamentos.css']
@@ -215,7 +217,7 @@ irACrear(): void {
   }
 
   // --- Helpers de UI (Estilos) ---
-  
+
   /**
    * (SOLUCIÓN 2: Añadir la función 'showError' que faltaba)
    */

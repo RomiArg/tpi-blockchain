@@ -1,9 +1,17 @@
-// src/app/login/login.component.ts
 import { Component } from '@angular/core';
-import { AuthService, UserRole } from '../../servicios/auth.service'; // Asegúrate que la ruta sea correcta
+import { AuthService, UserRole } from '../../servicios/auth.service';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-login',
+  standalone: true,
+  imports: [
+    MatIconModule,
+    MatCardModule,
+    MatButtonModule
+  ],
   templateUrl: './login.html',
   styleUrls: ['./login.css']
 })
