@@ -123,96 +123,6 @@ y asi para todos los roles...
 ```
 
 ### Paso 2: Levantar la Red Fabric y Desplegar (Terminal 2)
-#### Smart Contract en Typescript
-Ahora sí, levantamos la red con todos nuestros arreglos.
-
-Abre una nueva terminal (Git Bash o PowerShell) como Administrador en Windows.
-
-Ve al directorio de la `test-network`:
-
-```bash
-cd tpi-blockchain/fabric-samples/test-network
-```
-
-Limpia ejecuciones anteriores (si las hay):
-En algunos casos en Linux usar los siguientes comandos
-```bash
-docker stop $(docker ps -aq) 2>/dev/null || true
-docker rm $(docker ps -aq) 2>/dev/null || true
-docker system prune -f
-docker volume prune -f
-
-docker ps # Para ver que no haya procesos activos
-```
-
-```bash
-./network.sh down
-```
-
-Levanta la red (con CouchDB para poder ver los datos):
-
-```bash
-./network.sh up createChannel -s couchdb
-```
-
-En algunos casos de Linux es necesario modificar el archivo ``network.config``
-```yaml
-# default database (-s)
-DATABASE="couchdb"
-```
-Ahora usar este comando para Linux
-
-```bash
-./network.sh up createChannel -ca
-```
-
-Despliega TU chaincode luego del -ccn (`pharma-ledger`). Este comando usa:
-
-- La ruta del -ccp (`../../smart-contract`). Esta ruta es relativa considerando el directorio fabric-samples/test-network.
-- La política de Endorsement OR. Esto es fundamental para que la API (que solo habla con un peer) pueda validar transacciones.
-
-```bash
-./network.sh deployCC -ccn pharma-ledger -ccp ../../smart-contract-typescript -ccl typescript -ccep "OR('Org1MSP.peer','Org2MSP.peer')" -cci InitLedger
-```
-
-#### Probar la conexion
-##### Setear Variables de Entorno
-En Linux es importante setear las variables de entorno para que funcione el comando ``peer``
-Se puede usar este comando
-```bash
-source scripts/envVar.sh && setGlobals 1
-```
-O estos en el caso que no funcione el anterior
-```bash
-export PATH=${PWD}/../bin:$PATH
-export FABRIC_CFG_PATH=$PWD/../config/
-export CORE_PEER_TLS_ENABLED=true
-export CORE_PEER_LOCALMSPID="Org1MSP"
-export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
-export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
-export CORE_PEER_ADDRESS=localhost:7051
-```
-
-###### Probar
-
-```bash
-peer chaincode query -C mychannel -n pharma-ledger -c '{"Args":["ConsultarTodosLosMedicamentos"]}'
-```
-
-```bash
-peer chaincode invoke \
-  -o localhost:7050 \
-  --ordererTLSHostnameOverride orderer.example.com \
-  --tls \
-  --cafile $PWD/organizations/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem \
-  -C mychannel \
-  -n pharma-ledger \
-  --peerAddresses localhost:7051 \
-  --tlsRootCertFiles $PWD/organizations/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem \
-  --peerAddresses localhost:9051 \
-  --tlsRootCertFiles $PWD/organizations/peerOrganizations/org2.example.com/tlsca/tlsca.org2.example.com-cert.pem \
-  -c '{"Args":["CrearMedicamento","MED-3001","TestMed","LOTE-123","2024-01-01","2025-01-01"]}'
-```
 
 #### Smart Contract en Go
 Para desplegar el smart contract escrito en Go, debemos seguir pasos similares al de TypeScript, pero con dos diferencias clave:
@@ -411,3 +321,10 @@ Inicia el servidor de desarrollo de Angular:
 ```bash
 ng serve
 ```
+### 📝 Nota sobre la carpeta smart-contract-typescript
+
+Se observará que en el repositorio existe una carpeta llamada smart-contract-typescript.
+
+Este fue un desarrollo inicial para construir el chaincode en TypeScript. Sin embargo, este desarrollo se discontinuó y no está funcional. El proyecto final y funcional se completó utilizando Go (disponible en la carpeta smart-contract-go).
+
+La carpeta de TypeScript se mantiene en el repositorio únicamente a modo de historial o por si se desea retomar en un futuro, pero no debe utilizarse para el despliegue o la operación del proyecto. Todas las instrucciones de este README corresponden a la versión funcional en Go.

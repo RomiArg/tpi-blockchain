@@ -95,7 +95,7 @@ ngOnInit(): void {
   }
 
   onTransferir(medicamento: Medicamento): void {
-    // (MODIFICADO) Ahora usamos Roles de negocio
+    // Roles de negocio
     let nuevoPropietarioRole: UserRole = null;
 
     if (medicamento.estadoActual === Estado.CREADO) {
@@ -110,11 +110,11 @@ ngOnInit(): void {
     if (!nuevoPropietarioRole) return; // Seguridad
 
     this.cargando = true;
-    // (MODIFICADO) Obtenemos el Rol del actor que firma
+
     const actorRole = this.authService.getCurrentRole();
     if (!actorRole) return; // Seguridad
 
-    // (MODIFICADO) Llamamos a la nueva función del servicio
+
     this.pharmaService.transferir(medicamento.assetID, nuevoPropietarioRole, actorRole)
       .pipe(finalize(() => this.onConsultarTodos()))
       .subscribe({
@@ -136,11 +136,11 @@ ngOnInit(): void {
     }
 
     this.cargando = true;
-    // (MODIFICADO) Obtenemos el Rol del actor que firma
+    // Rol del actor que firma
     const actorRole = this.authService.getCurrentRole();
     if (!actorRole) return; // Seguridad
 
-    // (MODIFICADO) Llamamos a la nueva función del servicio
+
     this.pharmaService.recibir(medicamento.assetID, ubicacion, actorRole)
       .pipe(finalize(() => this.onConsultarTodos()))
       .subscribe({
@@ -157,11 +157,11 @@ ngOnInit(): void {
     }
 
     this.cargando = true;
-    // (MODIFICADO) Obtenemos el Rol del actor que firma
-    const actorRole = this.authService.getCurrentRole();
-    if (!actorRole) return; // Seguridad
 
-    // (MODIFICADO) Llamamos a la nueva función del servicio
+    const actorRole = this.authService.getCurrentRole();
+    if (!actorRole) return; 
+
+
     this.pharmaService.despachar(medicamento.assetID, idPaciente, actorRole)
       .pipe(finalize(() => this.onConsultarTodos()))
       .subscribe({
@@ -171,11 +171,11 @@ ngOnInit(): void {
   }
 
   // --- Lógica de Navegación ---
-  // (MODIFICADO) onVerHistorial debe pasar el objeto completo
+
   onVerHistorial(medicamento: Medicamento): void {
     this.dialog.open(VerHistorialMedicamento, {
       width: '80%',
-      data: medicamento // <-- Pasa el objeto completo
+      data: medicamento
     });
   }
 
@@ -185,7 +185,7 @@ ngOnInit(): void {
     });
 
     dialogRef.afterClosed().subscribe((resultado) => {
-      // Si el resultado es exitoso (puedes ajustar la condición según tu lógica)
+
       if (resultado === 'creado') {
         this.onConsultarTodos();
       }
@@ -196,7 +196,7 @@ ngOnInit(): void {
     this.authService.logout();
   }
 
-  // --- Helpers de Visibilidad (Tu lógica aquí es correcta) ---
+  // --- Visibilidad ---
 
   showTransferir(med: Medicamento): boolean {
     console.log(this.isLaboratorio, med.estadoActual, this.isLogistica, Estado.CREADO);
@@ -215,11 +215,6 @@ ngOnInit(): void {
     return this.isSalud && med.estadoActual === Estado.RECIBIDO_SALUD;
   }
 
-  // --- Helpers de UI (Estilos) ---
-
-  /**
-   * (SOLUCIÓN 2: Añadir la función 'showError' que faltaba)
-   */
   private showError(err: any): void {
     console.error(err);
     this.snackBar.open(`Error: ${err.error?.error || err.message || 'Error desconocido'}`, 'Cerrar', { duration: 5000 });

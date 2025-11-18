@@ -14,7 +14,7 @@ type PharmaLedger struct {
 	contractapi.Contract
 }
 
-// (CORRECCIÓN 1) Estados definidos como strings
+
 const (
 	CREADO                         = "CREADO"
 	EN_TRANSITO_LAB_A_LOGISTICA    = "EN_TRANSITO_LAB_A_LOGISTICA"
@@ -24,7 +24,7 @@ const (
 	DESPACHADO_A_PACIENTE          = "DESPACHADO_A_PACIENTE"
 )
 
-// (CORRECCIÓN 2) Definición del struct para el historial
+
 type RegistroHistorial struct {
 	Timestamp string `json:"timestamp"`
 	Actor     string `json:"actor"` // ID de usuario (ej. Admin@org1.example.com)
@@ -32,7 +32,7 @@ type RegistroHistorial struct {
 	Ubicacion string `json:"ubicacion"`
 }
 
-// (CORRECCIÓN 3) Definición del struct Medicamento (con campos faltantes)
+
 type Medicamento struct {
 	AssetID                string              `json:"assetID"`
 	NombreComercial        string              `json:"nombreComercial"`
@@ -44,12 +44,12 @@ type Medicamento struct {
 	EstadoActual           string              `json:"estadoActual"`
 	UbicacionActual        string              `json:"ubicacionActual"`
 	PacienteID             string              `json:"pacienteID"`
-	HistorialDeCustodia    []RegistroHistorial `json:"historialDeCustodia"` // <-- AÑADIDO
-	DocType                string              `json:"docType,omitempty"`     // <-- AÑADIDO
+	HistorialDeCustodia    []RegistroHistorial `json:"historialDeCustodia"` 
+	DocType                string              `json:"docType,omitempty"`     
 	Timestamp              time.Time           `json:"timestamp"`
 }
 
-// (CORRECCIÓN 4) Helper para obtener la identidad completa del actor
+
 type Actor struct {
 	ID    string
 	MSPID string
@@ -76,7 +76,7 @@ func (s *PharmaLedger) getActor(ctx contractapi.TransactionContextInterface) (*A
 	return &Actor{ID: actorID, MSPID: actorMSPID}, nil
 }
 
-// (CORRECCIÓN 5) Tu InitLedger (con el 'Actor' corregido)
+
 func (s *PharmaLedger) InitLedger(ctx contractapi.TransactionContextInterface) error {
 	log.Println("--- InitLedger INVOCADO ---")
 
@@ -97,7 +97,7 @@ func (s *PharmaLedger) InitLedger(ctx contractapi.TransactionContextInterface) e
 			Lote:                   "LOTE-001",
 			FechaFabricacion:       "2025-01-10T10:00:00Z",
 			FechaVencimiento:       "2026-01-10T10:00:00Z",
-			EstadoActual:           CREADO, // (Ahora esto es un string "CREADO")
+			EstadoActual:           CREADO,
 			PropietarioActualID:    actorID,
 			PropietarioActualMSPID: actorMSPID,
 			UbicacionActual:        "Planta de Producción",
@@ -118,7 +118,7 @@ func (s *PharmaLedger) InitLedger(ctx contractapi.TransactionContextInterface) e
 			Lote:                   "LOTE-002",
 			FechaFabricacion:       "2025-02-15T10:00:00Z",
 			FechaVencimiento:       "2026-02-15T10:00:00Z",
-			EstadoActual:           CREADO, // (Ahora esto es un string "CREADO")
+			EstadoActual:           CREADO,
 			PropietarioActualID:    actorID,
 			PropietarioActualMSPID: actorMSPID,
 			UbicacionActual:        "Planta de Producción",
@@ -126,7 +126,7 @@ func (s *PharmaLedger) InitLedger(ctx contractapi.TransactionContextInterface) e
 			HistorialDeCustodia: []RegistroHistorial{
 				{
 					Timestamp: txTime,
-					Actor:     actorID, // (Corregido)
+					Actor:     actorID,
 					Accion:    "CREADO",
 					Ubicacion: "Planta de Producción",
 				},
@@ -151,7 +151,7 @@ func (s *PharmaLedger) InitLedger(ctx contractapi.TransactionContextInterface) e
 	return nil
 }
 
-// (CORRECCIÓN 6) Tu helper 'agregarHistorial' (con 'actorID')
+
 func (s *PharmaLedger) agregarHistorial(ctx contractapi.TransactionContextInterface, medicamento *Medicamento, actorID string, accion string, ubicacion string) error {
 	txTimestamp, err := ctx.GetStub().GetTxTimestamp()
 	if err != nil {
@@ -170,9 +170,9 @@ func (s *PharmaLedger) agregarHistorial(ctx contractapi.TransactionContextInterf
 	return nil
 }
 
-// --- FUNCIONES DE LÓGICA DE NEGOCIO (Ahora deberían compilar) ---
+// --- FUNCIONES DE LÓGICA DE NEGOCIO ---
 
-// getMedicamento: Helper para obtener y 'unmarshal' un medicamento
+
 func (s *PharmaLedger) getMedicamento(ctx contractapi.TransactionContextInterface, assetID string) (*Medicamento, error) {
 	medicamentoJSON, err := ctx.GetStub().GetState(assetID)
 	if err != nil {
@@ -266,7 +266,7 @@ func (s *PharmaLedger) Transferir(ctx contractapi.TransactionContextInterface, a
 		return err
 	}
 
-	// Validación FINA: Solo el propietario (ID) actual puede transferir
+	// Validación: Solo el propietario (ID) actual puede transferir
 	if actor.ID != medicamento.PropietarioActualID {
 		return fmt.Errorf("transacción no autorizada: solo el propietario actual (%s) puede transferir. Actor: %s", medicamento.PropietarioActualID, actor.ID)
 	}
@@ -330,7 +330,7 @@ func (s *PharmaLedger) Recibir(ctx contractapi.TransactionContextInterface, asse
 		return err
 	}
 
-	// Validación FINA: Solo el ID propietario puede recibir
+	// Validación: Solo el ID propietario puede recibir
 	if actor.ID != medicamento.PropietarioActualID {
 		fmt.Printf("[ERROR] Recibir: Fallo de autorización. Actor: [%s], Propietario requerido: [%s]\n", actor.ID, medicamento.PropietarioActualID)
 		return fmt.Errorf("transacción no autorizada: solo el nuevo propietario (%s) puede recibir. Actor: %s", medicamento.PropietarioActualID, actor.ID)
@@ -402,15 +402,14 @@ func (s *PharmaLedger) DespacharAPaciente(ctx contractapi.TransactionContextInte
 		return fmt.Errorf("estado inválido: solo se puede despachar un activo en estado 'RECIBIDO_SALUD' y propiedad de Salud")
 	}
 	
-	// --- ¡ESTA ES LA SOLUCIÓN! ---
 	// Cambiamos el estado Y el propietario
 	medicamento.EstadoActual = DESPACHADO_A_PACIENTE
 	medicamento.PacienteID = pacienteID
 	medicamento.UbicacionActual = "Entregado a Paciente"
-	medicamento.PropietarioActualID = pacienteID // <-- (LÍNEA AÑADIDA)
-	medicamento.PropietarioActualMSPID = "PACIENTE_FINAL" // <-- (LÍNEA AÑADIDA)
+	medicamento.PropietarioActualID = pacienteID 
+	medicamento.PropietarioActualMSPID = "PACIENTE_FINAL"
 	medicamento.Timestamp = time.Now()
-	// --- Fin de la solución ---
+
 
 	// Agrega al historial
 	err = s.agregarHistorial(ctx, medicamento, actor.ID, "DESPACHADO_A_PACIENTE", "Entregado a Paciente")
@@ -518,7 +517,6 @@ func (s *PharmaLedger) ConsultarHistorial(ctx contractapi.TransactionContextInte
 }
 
 
-// --- Main ---
 func main() {
 	chaincode, err := contractapi.NewChaincode(&PharmaLedger{})
 	if err != nil {

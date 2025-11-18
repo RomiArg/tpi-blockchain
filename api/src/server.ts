@@ -8,7 +8,7 @@ import * as crypto from 'crypto';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
-// Cargar variables de entorno desde .env
+// cargar .env
 dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 
 const app = express();
@@ -16,14 +16,13 @@ app.use(cors());
 app.use(express.json());
 const port = 3000;
 
-// --- Constantes de Fabric ---
 const channelName = process.env.CHANNEL_NAME || 'mychannel';
 const chaincodeName = process.env.CHAINCODE_NAME || 'pharma-ledger';
 
 const contracts = new Map<string, Contract>();
 const roleIdentities = new Map<string, string>(); // Almacena el ID (ej. "Admin@org1...") por Rol
 
-// --- Interfaces de Body ---
+// --- Interfaces ---
 interface CrearMedicamentoBody {
     assetID: string;
     nombreComercial: string;
@@ -34,7 +33,7 @@ interface CrearMedicamentoBody {
 
 interface TransaccionActorBody {
     actorRole: string; // El frontend debe enviar 'Laboratorio', 'Logistica', etc.
-    nuevoPropietarioRole?: string; // El rol del nuevo propietario
+    nuevoPropietarioRole?: string;
     ubicacion?: string;
     idPaciente?: string;
 }
@@ -63,9 +62,6 @@ async function loadRole(role: string, mspId: string, certPath: string, keyPath: 
     console.log(`✅ Conexión como Rol [${role}] establecida.`);
 }
 
-/**
- * (MODIFICADO) Inicializa AMBAS conexiones de Fabric
- */
 async function initializeFabric(): Promise<void> {
     try {
         console.log('Inicializando 4 conexiones de roles...');
@@ -137,10 +133,6 @@ async function initializeFabric(): Promise<void> {
     }
 }
 
-/**
- * (NUEVO) Helper para seleccionar el contrato (identidad) correcto.
- * Esta es la "magia" que soluciona tu problema.
- */
 function getContractForRole(role: string): Contract {
     const contract = contracts.get(role);
     if (!contract) {
@@ -151,9 +143,8 @@ function getContractForRole(role: string): Contract {
 }
 
 
-// --- Endpoints de la API (Modificados) ---
+// --- Endpoints de la API ---
 
-// Las consultas (GET) pueden usar cualquier contrato (usamos Org1 por simplicidad)
 app.get('/api/medicamentos', async (req: Request, res: Response) => {
     try {
         console.log('[LOG API] Recibida petición GET /api/medicamentos (todos)');
@@ -204,8 +195,6 @@ app.post('/api/medicamentos', async (req: Request, res: Response) => {
         if (!assetID || !nombreComercial || !lote || !fechaFabricacion || !fechaVencimiento) {
             return res.status(400).json({ error: 'Faltan campos obligatorios' });
         }
-        // CrearMedicamento SIEMPRE es Org1 (Laboratorio)
-        // Usamos contractOrg1 directamente
         const contract = getContractForRole('Laboratorio');
         await contract.submitTransaction(
             'CrearMedicamento',
@@ -232,11 +221,9 @@ app.put('/api/medicamentos/:id/transferir', async (req: Request, res: Response) 
         if (!nuevoPropietarioRole || !actorRole) {
             return res.status(400).json({ error: 'Faltan campos: nuevoPropietarioRole o actorRole' });
         }
-
-        // 1. Obtenemos el contrato (identidad) del actor que FIRMA
         const contract = getContractForRole(actorRole);
 
-        // 2. Obtenemos los datos del NUEVO propietario (los pasamos al chaincode)
+   
         const nuevoPropietarioID = roleIdentities.get(nuevoPropietarioRole);
         const nuevoPropietarioMSPID = (nuevoPropietarioRole === 'Laboratorio' || nuevoPropietarioRole === 'Regulador') ? 'Org1MSP' : 'Org2MSP';
 
@@ -267,7 +254,7 @@ app.put('/api/medicamentos/:id/recibir', async (req: Request, res: Response) => 
             return res.status(400).json({ error: 'Faltan campos: ubicacion o actorRole' });
         }
 
-        const contract = getContractForRole(actorRole); // Usa la identidad del rol (ej. Salud)
+        const contract = getContractForRole(actorRole);
         await contract.submitTransaction('Recibir', assetID, ubicacion);
         res.status(200).json({ status: 'ok', action: 'recibido' });
 
@@ -280,15 +267,12 @@ app.put('/api/medicamentos/:id/recibir', async (req: Request, res: Response) => 
 app.post('/api/medicamentos/:id/despachar', async (req: Request, res: Response) => {
     try {
         const assetID = req.params.id;
-        // (MODIFICADO) Obtenemos el actorRole del body
         const { idPaciente, actorRole } = req.body as TransaccionActorBody;
 
         console.log(`[LOG API] Recibida petición POST /api/medicamentos/${assetID}/despachar`, req.body);
         if (!idPaciente || !actorRole) {
             return res.status(400).json({ error: 'Faltan campos: idPaciente o actorRole' });
         }
-
-        // (MODIFICADO) Seleccionamos el contrato (identidad) correcto
         const contract = getContractForRole(actorRole);
 
         await contract.submitTransaction(
@@ -308,26 +292,21 @@ app.post('/api/medicamentos/:id/despachar', async (req: Request, res: Response) 
 
 // --- Iniciar Servidor ---
 app.listen(port, async () => {
-    // (MODIFICADO) Llama a la nueva función de inicialización
     await initializeFabric();
     console.log(`🚀 Servidor API de PharmaLedger (TS) escuchando en http://localhost:${port}`);
 });
 
-// --- Funciones de Conexión (MODIFICADAS para ser genéricas) ---
-// Estas funciones ya estaban bien porque aceptaban parámetros
 
-// CÓDIGO CORREGIDO
 async function newGrpcClient(peerEndpoint: string, tlsCertPath: string, peerHostAlias: string): Promise<grpc.Client> {
     const tlsRootCert = await fs.readFile(tlsCertPath);
     const tlsCredentials = grpc.credentials.createSsl(tlsRootCert);
     return new grpc.Client(peerEndpoint, tlsCredentials, {
         'grpc.ssl_target_name_override': peerHostAlias,
-        'grpc.default_authority': peerHostAlias // <-- AÑADE ESTA LÍNEA
+        'grpc.default_authority': peerHostAlias 
     });
 }
 
 async function newIdentity(certPath: string, mspId: string): Promise<Identity> {
-    // 'certPath' ahora es el camino *directo* al archivo .pem
     const credentials = await fs.readFile(certPath);
     return { mspId, credentials };
 }
